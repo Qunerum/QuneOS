@@ -1,7 +1,6 @@
 rootfs/init
 initrd.img
 storage.img
-linux/
 *.o
 *.out
 *.log
