@@ -25,13 +25,9 @@ find . -print0 | cpio --null -ov --format=newc --quiet | gzip -9 > ../initrd.img
 cd ..
 
 # 5. Start
-echo "--- Odpalanie QEMU ---"
-qemu-system-x86_64 \
-    -kernel linux/arch/x86/boot/bzImage \
-    -initrd initrd.img \
-    -append "console=ttyS0 quiet rdinit=/init" \
-    -nographic \
-    -hda storage.img \
-    -snapshot
+echo "--- Launching QuneOS in a new terminal window ---"
+# qemu-system-x86_64 -kernel linux/arch/x86/boot/bzImage -initrd initrd.img -append "console=ttyS0 quiet rdinit=/init" -nographic -hda storage.img
+qemu-system-x86_64 -kernel linux/arch/x86/boot/bzImage -initrd initrd.img -append "quiet rdinit=/init" -hda storage.img
 
+# clear
 ~/logo.sh
