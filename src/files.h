@@ -13,4 +13,6 @@ char** get_file_list(const char* path);
 void create_file(const char* name);
 void create_dir(const char* name);
 
+void delete_element(const char* name);
+
 #endif

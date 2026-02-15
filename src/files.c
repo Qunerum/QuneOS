@@ -42,7 +42,7 @@ void init_system_folders() {
 
 void expand_path(const char* input_path, char* output_path) {
     if (input_path[0] == '~') { sprintf(output_path, ".%s/%s%s", QOS_USER_ROOT, "admin", input_path + 1); } else
-        if (input_path[0] == '/') { sprintf(output_path, ".%s", input_path); } else { strcpy(output_path, input_path); }
+        if (input_path[0] == '/') { sprintf(output_path, "./qos%s", input_path); } else { strcpy(output_path, input_path); }
 }
 
 char** get_file_list(const char* logical_path) {
@@ -95,5 +95,30 @@ void create_dir(const char* name) {
     char path[128];
     snprintf(path, sizeof(path), "/mnt/%s", name);
     if (mkdir(path, 0777) == 0) print_color("Folder utworzony!\n", GREEN);
-    else perror("Błąd");
+    else perror("ERROR");
+}
+void delete_element(const char* name) {
+    char path[512];
+    expand_path(name, path);
+
+    struct stat st;
+    if (stat(path, &st) != 0) {
+        perror("Błąd: Element nie istnieje");
+        return;
+    }
+
+    if (S_ISDIR(st.st_mode)) {
+        if (rmdir(path) == 0) {
+            print_color("Folder usunięty!\n", GREEN);
+        } else {
+            perror("Błąd przy usuwaniu folderu (może nie jest pusty?)");
+        }
+    } else {
+        // Usuwanie pliku
+        if (unlink(path) == 0) {
+            print_color("Plik usunięty!\n", GREEN);
+        } else {
+            perror("Błąd przy usuwaniu pliku");
+        }
+    }
 }
