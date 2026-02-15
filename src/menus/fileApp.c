@@ -64,7 +64,7 @@ void go_back_dir(char* path) {
     if (last_slash != NULL) { if (last_slash == path) strcpy(path, "/"); else *last_slash = '\0'; }
 }
 static int currentOption = 0;
-static char* opts[] = { "Nothing", "Write", "Remove", "Rename", "Return" };
+static char* opts[] = { "Nothing", "Create", "Delete", "Rename", "Return" };
 static int options = 5;
 static void render(MenuModule* me, int c, int index) {
     if (current_files == NULL) refresh_explorer(me);
@@ -83,7 +83,6 @@ static void render(MenuModule* me, int c, int index) {
     else if (currentOption >= options)
         currentOption = 0;
 
-
     printf("| ");
     for (int i = 0; i < options; i++)
     {
@@ -94,7 +93,7 @@ static void render(MenuModule* me, int c, int index) {
 
     printf("+--- Name ---------------+----- type -----+---- size ----+\n");
     if (index == 0) printf(BG_BLUE WHITE);
-    printf("| Return [..]            |                |              |\n" RESET);
+    printf("| ..                     |                |              |\n" RESET);
     for (int i = 1; i < current_files_count; i++) {
         char displayName[256] = {0};
         char type[10] = {0};
@@ -109,25 +108,29 @@ static void render(MenuModule* me, int c, int index) {
     }
     printf("+------------------------+----------------+--------------+\n");
 }
-static void handle(int index)
+static void handle(int index, MenuModule* me)
 {
-    if (index == 0)
+    switch (currentOption)
     {
-        go_back_dir(currentPath);
-        clear_current_files();
-        return;
-    }
-    if (current_files[index - 1] != NULL)
-    {
-        char displayName[256] = {0};
-        char type[10] = {0};
-        get_display_info(current_files[index - 1], displayName, type);
-        if (strcmp(type, "DIR") == 0)
-        {
-            strcat(currentPath, current_files[index - 1]);
-            clear_current_files();
-            return;
-        }
+        case 0:
+            if (index == 0) { go_back_dir(currentPath); clear_current_files(); return; }
+            if (current_files[index - 1] != NULL)
+            {
+                char displayName[256] = {0}; char type[10] = {0};
+                get_display_info(current_files[index - 1], displayName, type);
+                if (strcmp(type, "DIR") == 0) { strcat(currentPath, current_files[index - 1]); clear_current_files(); return; }
+            }
+            break;
+        case 1:
+            // Create
+            break;
+        case 2:
+            // Delete
+            break;
+        case 3:
+            // Rename
+            break;
+        case 4: me->running = 0; break;
     }
 }
 
@@ -135,6 +138,7 @@ MenuModule fileApp = {
     .title = "Files",
     .options = opts,
     .options_count = 1,
+    .running = 1,
     .on_select = handle,
     .custom_render = render
 };

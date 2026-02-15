@@ -6,11 +6,10 @@
 void run_menu_module(MenuModule* module) {
     int min = (strcmp(module->title, "QuneOS") == 0 || strcmp(module->title, "Files") == 0) ? 0 : -1;
     int selected = min;
-    int running = 1;
     int current = 0;
     if (module->custom_render != NULL && strcmp(module->title, "Files") != 0)
         min = 0;
-    while (running) {
+    while (module->running) {
         clear_screen();
 
         if (module->custom_render != NULL) module->custom_render(module, current, selected); else
@@ -33,7 +32,7 @@ void run_menu_module(MenuModule* module) {
         current = getch();
         if (current == 'w' || current == 'A') { selected--; }
         else if (current == 's' || current == 'B') { selected++; }
-        else if (current == 10) { if (selected == -1) { running = 0; continue; } else { module->on_select(selected); } }
+        else if (current == 10) { if (selected == -1) { module->running = 0; continue; } else { module->on_select(selected, module); } }
         if (selected < min)
             selected = module->options_count - 1;
         else if (selected >= module->options_count)

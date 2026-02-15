@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "../menu.h"
 
-static void handle(int index)
+static void handle(int index, MenuModule* me)
 {
     switch (index)
     {
@@ -20,5 +20,6 @@ MenuModule programsMenu = {
     .title = "Programs",
     .options = opts,
     .options_count = 2,
+    .running = 1,
     .on_select = handle
 };

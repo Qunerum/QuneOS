@@ -5,7 +5,8 @@ typedef struct MenuModule {
     char* title;
     char** options;
     int options_count;
-    void (*on_select)(int option_index);
+    int running;
+    void (*on_select)(int option_index, struct MenuModule* module);
     void (*custom_render)(struct MenuModule* self, int c, int selected);
 } MenuModule;
 
