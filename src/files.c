@@ -41,18 +41,8 @@ void init_system_folders() {
 }
 
 void expand_path(const char* input_path, char* output_path) {
-    // Jeśli ścieżka zaczyna się od ~, zamieniamy to na /mnt/qos/user/admin
-    if (input_path[0] == '~') {
-        sprintf(output_path, "%s/%s%s", QOS_USER_ROOT, "admin", input_path + 1);
-    }
-    // Jeśli ścieżka zaczyna się od /, to traktujemy to jako root naszego systemu (./mnt/qos)
-    else if (input_path[0] == '/') {
-        sprintf(output_path, "./qos%s", input_path);
-    }
-    // W innym przypadku kopiujemy jak jest (ścieżka względna)
-    else {
-        strcpy(output_path, input_path);
-    }
+    if (input_path[0] == '~') { sprintf(output_path, ".%s/%s%s", QOS_USER_ROOT, "admin", input_path + 1); } else
+        if (input_path[0] == '/') { sprintf(output_path, ".%s", input_path); } else { strcpy(output_path, input_path); }
 }
 
 char** get_file_list(const char* logical_path) {

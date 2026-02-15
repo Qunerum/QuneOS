@@ -50,35 +50,60 @@ void clear_current_files() {
     free(current_files);
     current_files = NULL;
 }
-char* currentPath = "./mnt/";
-void refresh_explorer() {
+static char currentPath[512] = "/";
+void refresh_explorer(MenuModule* me) {
     clear_current_files();
-    current_files = get_file_list("./mnt/");
-    current_files_count = 0;
-    if (current_files) { while(current_files[current_files_count] != NULL) current_files_count++; }
+    current_files = get_file_list(currentPath);
+    current_files_count = 1;
+    if (current_files) { while(current_files[current_files_count - 1] != NULL) current_files_count++; }
+    me->options_count = current_files_count;
 }
-
+void go_back_dir(char* path) {
+    if (path == NULL || strcmp(path, "/") == 0 || strlen(path) == 0) return;
+    char* last_slash = strrchr(path, '/');
+    if (last_slash != NULL) { if (last_slash == path) strcpy(path, "/"); else *last_slash = '\0'; }
+}
 static char* opts[] = { "Write", "Remove", "Rename", "Return" };
 static void render(MenuModule* me, int c, int index) {
-    if (current_files == NULL) refresh_explorer();
+    if (current_files == NULL) refresh_explorer(me);
 
+    printf("+--- Files -----------+\n");
+    char ou[512];
+    expand_path(currentPath, ou);
+    printf("+--- Current path: %-8s ---+ %d\n", ou, index);
     printf("+--- Name ------------+-- type --+-- size --+\n");
-    for (int i = 0; i < current_files_count; i++) {
+    if (index == 0) printf(BG_BLUE WHITE);
+    printf("| Return [..]         |          |          |\n" RESET);
+    for (int i = 1; i < current_files_count; i++) {
         char displayName[256] = {0};
         char type[10] = {0};
         char sizeStr[15] = {0};
         struct stat st;
 
-        stat(current_files[i], &st);
-        get_display_info(current_files[i], displayName, type);
+        stat(current_files[i - 1], &st);
+        get_display_info(current_files[i - 1], displayName, type);
         format_size(st.st_size, sizeStr);
 
         if (i == index) printf(BG_BLUE WHITE);
-        printf("| %-19.19s | %-8.8s | %8s |\n" RESET, displayName, type, sizeStr);
+        printf("| %-19.19s | %-8.8s | %8s | %d\n" RESET, displayName, type, sizeStr, i);
     }
     printf("+---------------------+----------+----------+\n");
 }
-static void handle(int index) { }
+static void handle(int index)
+{
+    if (index == 0)
+    {
+        go_back_dir(currentPath);
+        clear_current_files();
+        return;
+    }
+    if (current_files[index - 1] != NULL)
+    {
+        strcat(currentPath, current_files[index - 1]);
+        clear_current_files();
+        return;
+    }
+}
 
 MenuModule fileApp = {
     .title = "Files",

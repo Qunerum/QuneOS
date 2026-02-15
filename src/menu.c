@@ -4,11 +4,11 @@
 #include "utils.h"
 
 void run_menu_module(MenuModule* module) {
-    int min = (strcmp(module->title, "QuneOS") == 0) ? 0 : -1;
+    int min = (strcmp(module->title, "QuneOS") == 0 || strcmp(module->title, "Files") == 0) ? 0 : -1;
     int selected = min;
     int running = 1;
     int current = 0;
-    if (module->custom_render != NULL)
+    if (module->custom_render != NULL && strcmp(module->title, "Files") != 0)
         min = 0;
     while (running) {
         clear_screen();

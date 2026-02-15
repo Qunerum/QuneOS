@@ -17,7 +17,6 @@ static void handle(int index)
     }
 }
 static char* opts[] = { "Programs", "Games", "Quit" };
-
 MenuModule mainMenu = {
     .title = "QuneOS",
     .options = opts,
