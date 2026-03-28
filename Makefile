@@ -13,15 +13,15 @@ BIN = bin/qos-kernel.bin
 
 all: $(BIN)
 
-bin/boot.o: boot/boot.asm
+bin/boot.o: src/boot/boot.asm
 	mkdir -p bin
-	$(AS) -f elf32 boot/boot.asm -o bin/boot.o
+	$(AS) -f elf32 src/boot/boot.asm -o bin/boot.o
 
-bin/%.o: kernel/%.c
+bin/%.o: src/kernel/%.c
 	mkdir -p bin
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bin/%.o: common/%.c
+bin/%.o: src/common/%.c
 	mkdir -p bin
 	$(CC) $(CFLAGS) -c $< -o $@
 

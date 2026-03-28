@@ -3,9 +3,8 @@
 
 void kmain() {
     clear();
-    print("Jakas wiadomosc z kernela\n");
-    printInt(2137);
     hideCursor();
+    for (int i = 0; i < 50; i++) { printInt(i); print(".\n"); delay(1000); }
 
     while(1);
 }

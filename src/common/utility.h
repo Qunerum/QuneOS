@@ -15,4 +15,6 @@ void printbInt(int n, char back);
 void printcInt(int n, char clr);
 void printInt(int n);
 
+void delay(int count);
+
 #endif

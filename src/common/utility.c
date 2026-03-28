@@ -12,7 +12,7 @@ static int cursor = 1;
 void outb(unsigned short port, unsigned char val) { asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) ); }
 void update_cursor() {
     unsigned short pos = cursorY * 80 + cursorX;
-    if (!cursor) { pos = 6425; }
+    if (!cursor) { pos = 4000; }
     outb(0x3D4, 0x0F);
     outb(0x3D5, (unsigned char) (pos & 0xFF));
     outb(0x3D4, 0x0E);
@@ -20,6 +20,14 @@ void update_cursor() {
 }
 void showCursor() { cursor = 1; update_cursor(); }
 void hideCursor() { cursor = 0; update_cursor(); }
+void scroll_screen() {
+    for (int i = 0; i < 24 * 80 * 2; i++) { vga_buffer[i] = vga_buffer[i + 160]; }
+    for (int i = 24 * 80 * 2; i < 25 * 80 * 2; i += 2) {
+        vga_buffer[i] = ' ';
+        vga_buffer[i + 1] = 0x07;
+    }
+    cursorY = 24;
+}
 
 void clear()
 {
@@ -34,6 +42,7 @@ void clear()
 void printcb(char* msg, char clr, char bck)
 {
     for (int i = 0; msg[i] != '\0'; i++) {
+        if (cursorY >= 25) { scroll_screen(); }
         if (msg[i] == '\n') { cursorX = 0; cursorY++; continue; }
         if (cursorX >= 80) { cursorX = 0; cursorY++; }
         int l = (cursorY * 80 + cursorX) * 2;
@@ -68,3 +77,5 @@ void printcInt(int n, char clr) { printcbInt(n, clr, BLACK); }
 void printInt(int n) { printcbInt(n, LIGHT_GRAY, BLACK); }
 
 // < = = = = = = = = = = > END TERMINAL < = = = = = = = = = = >
+
+void delay(int count) { for (volatile int i = 0; i < count * 100000; i++) { } }
