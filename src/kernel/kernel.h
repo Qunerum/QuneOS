@@ -16,3 +16,5 @@
 #define YELLOW         0x0E
 #define WHITE          0x0F
 #define MKCLR(fg, bg) ((bg << 4) | fg)
+
+typedef unsigned long uintptr_t;

@@ -3,8 +3,17 @@
 
 void kmain() {
     clear();
-    hideCursor();
-    for (int i = 0; i < 50; i++) { printInt(i); print(".\n"); delay(1000); }
+    print("Podaj swoje imie: ");
+
+    char name[50];
+    readLine(name, 50);
+
+    print("Witaj, ");
+    print(name);
+    print("!\n");
+
+    print("Twoj bufor jest pod adresem: ");
+    printHex((uintptr_t)name);
 
     while(1);
 }

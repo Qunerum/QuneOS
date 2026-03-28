@@ -10,6 +10,7 @@ static int cursor = 1;
 
 
 void outb(unsigned short port, unsigned char val) { asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) ); }
+
 void update_cursor() {
     unsigned short pos = cursorY * 80 + cursorX;
     if (!cursor) { pos = 4000; }
@@ -27,6 +28,51 @@ void scroll_screen() {
         vga_buffer[i + 1] = 0x07;
     }
     cursorY = 24;
+}
+
+unsigned char inb(unsigned short port) { unsigned char ret; asm volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port)); return ret; }
+char scancode_to_ascii[] = {
+    0,  27, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
+    '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
+    0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`', 0, '\\',
+    'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0, '*', 0, ' '
+};
+
+char get_char() {
+    while (!(inb(0x64) & 1));
+    unsigned char scancode = inb(0x60);
+    if (scancode & 0x80) return 0;
+    return scancode_to_ascii[scancode];
+}
+void readLine(char* buffer, int maxLength) {
+    int i = 0;
+    showCursor(); // Upewnij się, że kursor widać
+
+    while (i < maxLength - 1) {
+        char c = get_char();
+        if (c == 0) continue; // Puszczony klawisz
+
+        if (c == '\n') {
+            print("\n");
+            break;
+        }
+
+        if (c == '\b') { // Backspace
+            if (i > 0) {
+                i--;
+                cursorX--; // Musisz cofnąć kursor i wypisać spację
+                print(" ");
+                cursorX--;
+                update_cursor();
+            }
+            continue;
+        }
+
+        buffer[i++] = c;
+        char s[2] = {c, '\0'};
+        print(s); // Echo - pokazuj co wpisujesz
+    }
+    buffer[i] = '\0';
 }
 
 void clear()
@@ -75,6 +121,24 @@ void printcbInt(int n, char clr, char bck) {
 void printbInt(int n, char clr) { printcbInt(n, LIGHT_GRAY, clr); }
 void printcInt(int n, char clr) { printcbInt(n, clr, BLACK); }
 void printInt(int n) { printcbInt(n, LIGHT_GRAY, BLACK); }
+
+void printcbHex(unsigned int n, char clr, char bck) {
+    char* hexChars = "0123456789ABCDEF";
+    char buf[11]; // "0x" + 8 znaków + null
+    buf[0] = '0';
+    buf[1] = 'x';
+    buf[10] = '\0';
+
+    for (int i = 9; i >= 2; i--) {
+        buf[i] = hexChars[n & 0xF];
+        n >>= 4;
+    }
+    printcb(buf, clr, bck);
+}
+
+void printbHex(unsigned int n, char clr) { printcbHex(n, LIGHT_GRAY, clr); }
+void printcHex(unsigned int n, char clr) { printcbHex(n, clr, BLACK); }
+void printHex(unsigned int n) { printcbHex(n, LIGHT_GRAY, BLACK); }
 
 // < = = = = = = = = = = > END TERMINAL < = = = = = = = = = = >
 
