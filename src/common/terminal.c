@@ -1,5 +1,6 @@
 #include "../kernel/kernel.h"
 #include "terminal.h"
+#include "utility.h"
 
 static char* vga_buffer = (char*)0xB8000;
 static int cursorX;
@@ -47,21 +48,54 @@ char get_char() {
     if (scancode == 0x2A || scancode == 0x36) { shift_pressed = 1; return 0; }
     if (scancode == 0xAA || scancode == 0xB6) { shift_pressed = 0; return 0; }
     if (scancode & 0x80) return 0;
+    if (scancode == 0x48 || scancode == 0x50) { return (char)scancode; }
     if (shift_pressed) { return kbd_map_shift[scancode]; } else { return kbd_map[scancode]; }
+}
+
+static char history[HISTORY_MAX][CMD_MAX];
+static int history_count = 0;
+static int history_index = -1;
+static int current_history_pos = 0;
+void add_to_history(char* cmd) {
+    if (len(cmd) == 0) return;
+    int i = 0;
+    while (cmd[i] != '\0' && i < CMD_MAX - 1) {
+        history[current_history_pos][i] = cmd[i];
+        i++;
+    }
+    history[current_history_pos][i] = '\0';
+    current_history_pos = (current_history_pos + 1) % HISTORY_MAX;
+    if (history_count < HISTORY_MAX) {
+        history_count++;
+    }
 }
 void readLine(char* buffer, int maxLength) {
     int i = 0;
     showCursor();
-
+    int temp_history_index = -1;
     while (i < maxLength - 1) {
         char c = get_char();
         if (c == 0) continue;
+        if (c == 0x48 || c == 0x50) {
+            if (history_count == 0) continue;
+            if (c == 0x48) { if (temp_history_index < history_count - 1) temp_history_index++; }
+            else { if (temp_history_index > -1) temp_history_index--; }
 
-        if (c == '\n') {
-            print("\n");
-            break;
+            while (i > 0) { i--; cursorX--; print(" "); cursorX--; }
+            if (temp_history_index == -1) { buffer[0] = '\0'; i = 0; } else {
+                int pos = (current_history_pos - 1 - temp_history_index + HISTORY_MAX) % HISTORY_MAX;
+                char* h_cmd = history[pos];
+                for (i = 0; h_cmd[i] != '\0' && i < maxLength - 1; i++) {
+                    buffer[i] = h_cmd[i];
+                    char s[2] = {buffer[i], '\0'};
+                    print(s);
+                }
+                buffer[i] = '\0';
+            }
+            update_cursor();
+            continue;
         }
-
+        if (c == '\n') {  print("\n"); break; }
         if (c == '\b') {
             if (i > 0) {
                 i--;
@@ -72,7 +106,7 @@ void readLine(char* buffer, int maxLength) {
             }
             continue;
         }
-
+        temp_history_index = -1;
         buffer[i++] = c;
         char s[2] = {c, '\0'};
         print(s);
@@ -145,7 +179,7 @@ void printbHex(unsigned int n, char clr) { printcbHex(n, LIGHT_GRAY, clr); }
 void printcHex(unsigned int n, char clr) { printcbHex(n, clr, BLACK); }
 void printHex(unsigned int n) { printcbHex(n, LIGHT_GRAY, BLACK); }
 
-void printf(char* format, ...) {
+void printq(char* format, ...) {
     char** argPtr = (char**)&format;
     argPtr++;
     for (int i = 0; format[i] != '\0'; i++) {
@@ -181,4 +215,10 @@ void printf(char* format, ...) {
             }
         } else { char str[2] = {format[i], '\0'}; print(str); }
     }
+}
+
+char* cut(char* str, int n) {
+    int l = len(str);
+    if (n >= l) return "";
+    return str + n;
 }

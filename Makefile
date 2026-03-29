@@ -8,7 +8,8 @@ CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -I.
 OBJ = bin/boot.o \
       bin/kernel.o \
       bin/utility.o \
-      bin/terminal.o
+      bin/terminal.o \
+      bin/terminalCMDs.o
 
 BIN = bin/qos-kernel.bin
 

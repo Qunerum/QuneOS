@@ -6,4 +6,7 @@ typedef struct {
     void (*handler)(char*);
 } TerminalCMD;
 
+extern TerminalCMD cmds[];
+extern int cmd_count;
+
 #endif

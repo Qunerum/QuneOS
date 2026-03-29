@@ -4,6 +4,10 @@
 void showCursor();
 void hideCursor();
 
+#define HISTORY_MAX 16
+#define CMD_MAX 128
+
+void add_to_history(char* cmd);
 void readLine(char* buffer, int maxLength);
 
 void clear();
@@ -22,6 +26,8 @@ void printbHex(unsigned int n, char clr);
 void printcHex(unsigned int n, char clr);
 void printHex(unsigned int n);
 
-void printf(char* format, ...);
+void printq(char* format, ...);
+
+char* cut(char* str, int n);
 
 #endif

@@ -1,4 +1,4 @@
-#include "../kernel/kernel.h"
+// #include "../kernel/kernel.h"
 #include "utility.h"
 
 void delay(int count) { for (volatile int i = 0; i < count * 100000; i++) { } }
