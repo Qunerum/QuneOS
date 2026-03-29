@@ -1,6 +1,1 @@
-rootfs/init
-initrd.img
-storage.img
-*.o
-*.out
-*.log
+bin/
