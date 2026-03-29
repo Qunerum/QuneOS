@@ -1,3 +1,6 @@
+#ifndef KERNEL_H
+#define KERNEL_H
+
 // COLORS
 #define BLACK          0x00
 #define BLUE           0x01
@@ -18,3 +21,5 @@
 #define MKCLR(fg, bg) ((bg << 4) | fg)
 
 typedef unsigned long uintptr_t;
+
+#endif

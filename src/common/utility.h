@@ -1,29 +1,9 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-// Terminal
-void showCursor();
-void hideCursor();
-
-void readLine(char* buffer, int maxLength);
-
-void clear();
-void printcb(char* msg, char clr, char bck);
-void printb(char* msg, char back);
-void printc(char* msg, char clr);
-void print(char* msg);
-
-void printcbInt(int n, char clr, char bck);
-void printbInt(int n, char back);
-void printcInt(int n, char clr);
-void printInt(int n);
-
-void printcbHex(unsigned int n, char clr, char bck);
-void printbHex(unsigned int n, char clr);
-void printcHex(unsigned int n, char clr);
-void printHex(unsigned int n);
-// End terminal
-
 void delay(int count);
+int len(char* str);
+int is(char* a, char* b);
+int startsWith(char* str, char* prefix);
 
 #endif

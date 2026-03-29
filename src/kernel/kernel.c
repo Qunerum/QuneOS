@@ -1,19 +1,29 @@
-#include "../common/utility.h"
 #include "kernel.h"
+#include "../common/utility.h"
+#include "../common/terminal.h"
+
+void logStart(char* msg, int state)
+{
+    print(" ");
+    if (state) { printc(msg, LIGHT_GREEN); } else { printc(msg, LIGHT_RED); }
+    for (int i = 0; i < 50 - len(msg); i++) { printc(".", DARK_GRAY); }
+    print(" [ ");
+    if (state) { printc(" OK ", LIGHT_GREEN); } else { printc("ERR!", LIGHT_RED); }
+    print(" ] \n");
+}
 
 void kmain() {
     clear();
-    print("Podaj swoje imie: ");
+    logStart("Kernel Memory", 1);
+    logStart("Keyboard Driver", 1);
+    logStart("VGA Text Mode", 1);
+    logStart("File System", 0);
+    logStart("Applications (0/3):", 0);
+    logStart("- Terminal", 0);
+    logStart("- File Manager", 0);
+    logStart("- Calculator", 0);
 
-    char name[50];
-    readLine(name, 50);
-
-    print("Witaj, ");
-    print(name);
-    print("!\n");
-
-    print("Twoj bufor jest pod adresem: ");
-    printHex((uintptr_t)name);
+    print("\n "); printcb("[ SYSTEM LOADED ]\n\n", WHITE, GREEN);
 
     while(1);
 }
