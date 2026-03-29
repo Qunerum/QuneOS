@@ -18,8 +18,8 @@ void kmain() {
     logStart("Keyboard Driver", 1);
     logStart("VGA Text Mode", 1);
     logStart("File System", 0);
-    logStart("Applications (0/3):", 0);
-    logStart("- Terminal", 0);
+    logStart("Applications (1/3):", 1);
+    logStart("- Terminal", 1);
     logStart("- File Manager", 0);
     logStart("- Calculator", 0);
 
