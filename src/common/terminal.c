@@ -120,7 +120,7 @@ void clear()
         vga_buffer[i] = ' ';
         vga_buffer[i + 1] = 0x07;
     }
-    cursorX = 0;
+    cursorX = 1;
     cursorY = 0;
     update_cursor();
 }
@@ -128,8 +128,8 @@ void printcb(char* msg, char clr, char bck)
 {
     for (int i = 0; msg[i] != '\0'; i++) {
         if (cursorY >= 25) { scroll_screen(); }
-        if (msg[i] == '\n') { cursorX = 0; cursorY++; continue; }
-        if (cursorX >= 80) { cursorX = 0; cursorY++; }
+        if (msg[i] == '\n') { cursorX = 1; cursorY++; continue; }
+        if (cursorX >= 80) { cursorX = 1; cursorY++; }
         int l = (cursorY * 80 + cursorX) * 2;
         vga_buffer[l] = msg[i];
         vga_buffer[l + 1] = MKCLR(clr, bck);
@@ -217,8 +217,3 @@ void printq(char* format, ...) {
     }
 }
 
-char* cut(char* str, int n) {
-    int l = len(str);
-    if (n >= l) return "";
-    return str + n;
-}

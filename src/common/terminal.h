@@ -28,6 +28,4 @@ void printHex(unsigned int n);
 
 void printq(char* format, ...);
 
-char* cut(char* str, int n);
-
 #endif
