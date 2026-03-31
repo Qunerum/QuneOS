@@ -9,7 +9,8 @@ OBJ = bin/boot.o \
       bin/kernel.o \
       bin/utility.o \
       bin/terminal.o \
-      bin/terminalCMDs.o
+      bin/terminalCMDs.o \
+      bin/files.o
 
 BIN = bin/qos-kernel.bin
 
