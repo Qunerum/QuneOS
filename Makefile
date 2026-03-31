@@ -32,7 +32,7 @@ $(BIN): $(OBJ)
 	$(LD) $(LDFLAGS) $(OBJ) -o $(BIN)
 
 run: $(BIN)
-	qemu-system-i386 -kernel $(BIN) -net none
+	qemu-system-i386 -kernel $(BIN) -drive file=disk.img,format=raw,if=ide -net none
 
 clean:
 	rm -rf bin/

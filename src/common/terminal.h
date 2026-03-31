@@ -1,8 +1,14 @@
 #ifndef TERMINAL_H
 #define TERMINAL_H
 
+#include "../kernel/kernel.h"
+
 void showCursor();
 void hideCursor();
+
+void outb(unsigned short port, unsigned char val);
+unsigned char inb(unsigned short port);
+uint16_t inw(uint16_t port);
 
 #define HISTORY_MAX 16
 #define CMD_MAX 128
