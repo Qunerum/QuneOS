@@ -6,24 +6,12 @@
 extern char actualPath[STR_LEN * 4];
 
 void help_qc(char* args) { for (int i = 0; i < cmd_count; i++) { printq("- %s\n", cmds[i]); } }
-void cd_qc(char* args) {
-    if (len(args) == 0) return;
-
-    // 1. Obsługa "cd .." (wyjście w górę)
-    if (is(args, "..")) {
-
-            int lastSlash = fndLast(actualPath, '/');
-            if (lastSlash != -1) {
-                cutEnd(actualPath, len(actualPath) - lastSlash);
-            }
-        } else {
-        printc("Blad: Katalog nie istnieje!\n", LIGHT_RED);
-    }
-}
+void cd_qc(char* args) { changeDir(args); }
 void ls_qc(char* args) { listFiles(); }
 void touch_qc(char* args) { touch(args); }
-void mkDir_qc(char* args) { makeDir(args); }
 void rm_qc(char* args) { removeFile(args); }
+void mkDir_qc(char* args) { makeDir(args); }
+void rmDir_qc(char* args) { removeDir(args); }
 void write_qc(char* args) {
     char a[STR_LEN];
     char b[STR_LEN];
@@ -47,8 +35,9 @@ TerminalCMD cmds[] = {
     {"cd", cd_qc},
     {"ls", ls_qc},
     {"touch", touch_qc},
-    {"mkdir", mkDir_qc},
     {"rm", rm_qc},
+    {"mkdir", mkDir_qc},
+    {"rmdir", rmDir_qc},
     {"edit", write_qc},
     {"cat", cat_qc},
 

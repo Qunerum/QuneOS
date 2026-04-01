@@ -16,7 +16,10 @@ void logStart(char* msg, int state)
 }
 void runCmd(char* input)
 {
-    for (int i = 0; i < cmd_count; i++) { if (startsWith(input, cmds[i].cmd)) { cmds[i].handler(cutStart(input, len(cmds[i].cmd) + 1)); return; } }
+    char cmd[STR_LEN];
+    char args[STR_LEN];
+    split(input, ' ', cmd, args);
+    for (int i = 0; i < cmd_count; i++) { if (is(cmd, cmds[i].cmd)) { cmds[i].handler(args); return; } }
     print("Unkown command!\n");
 }
 

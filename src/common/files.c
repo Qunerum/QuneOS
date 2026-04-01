@@ -2,6 +2,9 @@
 #include "terminal.h"
 #include "../common/utility.h"
 
+extern char actualPath[STR_LEN * 4];
+uint32_t current_dir_lba = 12; // Domyślnie ROOT to sektor 12
+
 void ide_wait_ready() { while (inb(0x1F7) & 0x80); }
 
 void read_sector(uint32_t lba, uint8_t* buffer) {
@@ -36,7 +39,7 @@ void write_sector(uint32_t lba, uint8_t* buffer) {
 }
 void listFiles() {
     uint8_t buf[512];
-    read_sector(QUNEFS_TABLE_SECTOR, buf);
+    read_sector(current_dir_lba, buf);
     QuneEntry* entries = (QuneEntry*)buf;
 
     for (int i = 0; i < 16; i++) {
@@ -50,7 +53,7 @@ void listFiles() {
 }
 void touch(char* name) {
     uint8_t buf[512];
-    read_sector(QUNEFS_TABLE_SECTOR, buf);
+    read_sector(current_dir_lba, buf);
     QuneEntry* entries = (QuneEntry*)buf;
     for (int i = 0; i < 512 / sizeof(QuneEntry); i++) {
         if (entries[i].type == 0) {
@@ -58,7 +61,7 @@ void touch(char* name) {
             for(int j=0; j<31 && name[j]; j++) entries[i].name[j] = name[j];
             entries[i].type = 1;
             entries[i].start_lba = QUNEFS_DATA_START + i;
-            write_sector(QUNEFS_TABLE_SECTOR, buf);
+            write_sector(current_dir_lba, buf);
             print("Utworzono plik.\n");
             return;
         }
@@ -66,7 +69,7 @@ void touch(char* name) {
 }
 void editFile(char* name, char* text) {
     uint8_t tableBuf[512];
-    read_sector(QUNEFS_TABLE_SECTOR, tableBuf);
+    read_sector(current_dir_lba, tableBuf);
     QuneEntry* entries = (QuneEntry*)tableBuf;
 
     for (int i = 0; i < 16; i++) {
@@ -94,7 +97,7 @@ void editFile(char* name, char* text) {
 }
 void catFile(char* name) {
     uint8_t tableBuf[512];
-    read_sector(QUNEFS_TABLE_SECTOR, tableBuf);
+    read_sector(current_dir_lba, tableBuf);
     QuneEntry* entries = (QuneEntry*)tableBuf;
 
     for (int i = 0; i < 16; i++) {
@@ -116,7 +119,7 @@ void catFile(char* name) {
 }
 void removeFile(char* name) {
     uint8_t buf[512];
-    read_sector(QUNEFS_TABLE_SECTOR, buf);
+    read_sector(current_dir_lba, buf);
     QuneEntry* entries = (QuneEntry*)buf;
 
     for (int i = 0; i < 16; i++) {
@@ -125,31 +128,78 @@ void removeFile(char* name) {
             // Opcjonalnie zerujemy nazwę, żeby w hex-podglądzie było czysto
             for(int j=0; j<32; j++) entries[i].name[j] = 0;
 
-            write_sector(QUNEFS_TABLE_SECTOR, buf);
+            write_sector(current_dir_lba, buf);
             print("Plik usuniety.\n");
             return;
         }
     }
     print("Nie znaleziono pliku do usuniecia.\n");
 }
-void makeDir(char* name) {
+void removeDir(char* name) {
     uint8_t buf[512];
-    read_sector(QUNEFS_TABLE_SECTOR, buf);
+    read_sector(current_dir_lba, buf);
     QuneEntry* entries = (QuneEntry*)buf;
 
     for (int i = 0; i < 16; i++) {
-        if (entries[i].type == 0) { // Znaleźliśmy wolne miejsce w tabeli
+        if (entries[i].type == 2 && is(entries[i].name, name)) {
+            entries[i].type = 0;
             for(int j=0; j<32; j++) entries[i].name[j] = 0;
-            for(int j=0; j<31 && name[j]; j++) entries[i].name[j] = name[j];
-
-            entries[i].type = 2;       // TYP 2 = FOLDER
-            entries[i].start_lba = 0;  // Folder na razie nie potrzebuje sektora danych
-            entries[i].size = 0;
-
-            write_sector(QUNEFS_TABLE_SECTOR, buf);
-            print("Folder utworzony.\n");
+            write_sector(current_dir_lba, buf);
+            print("Folder usuniety.\n");
             return;
         }
     }
-    print("Blad: Brak miejsca w tabeli.\n");
+    print("Nie znaleziono folderu o tej nazwie.\n");
+}
+void makeDir(char* name) {
+    uint8_t buf[512];
+    read_sector(current_dir_lba, buf); // Czytamy AKTUALNY katalog
+    QuneEntry* entries = (QuneEntry*)buf;
+
+    for (int i = 0; i < 16; i++) {
+        if (entries[i].type == 0) {
+            // Znajdujemy wolny sektor dla nowego folderu
+            // Na razie prymitywnie: 20 + i (powinieneś mieć licznik wolnych sektorów!)
+            uint32_t new_folder_lba = 30 + i;
+
+            // Czyścimy ten nowy sektor na dysku, żeby był pusty
+            uint8_t empty[512];
+            for(int j=0; j<512; j++) empty[j] = 0;
+            write_sector(new_folder_lba, empty);
+
+            // Zapisujemy wpis w obecnym katalogu
+            for(int j=0; j<32; j++) entries[i].name[j] = 0;
+            for(int j=0; j<31 && name[j]; j++) entries[i].name[j] = name[j];
+            entries[i].type = 2;
+            entries[i].start_lba = new_folder_lba;
+
+            write_sector(current_dir_lba, buf);
+            print("Utworzono podkatalog.\n");
+            return;
+        }
+    }
+}
+void changeDir(char* name) {
+    if (is(name, "*")) {
+        current_dir_lba = 12;
+        print("Wrocono do root.\n");
+        actualPath[0] = '*';
+        actualPath[1] = '\0';
+        return;
+    }
+
+    uint8_t buf[512];
+    read_sector(current_dir_lba, buf);
+    QuneEntry* entries = (QuneEntry*)buf;
+
+    for (int i = 0; i < 16; i++) {
+        if (entries[i].type == 2 && is(entries[i].name, name)) {
+            current_dir_lba = entries[i].start_lba;
+            print("Zmieniono katalog na: "); print(name); print("\n");
+            copyStr(actualPath, addStr(actualPath, "/"));
+            copyStr(actualPath, addStr(actualPath, name));
+            return;
+        }
+    }
+    print("Nie znaleziono katalogu.\n");
 }

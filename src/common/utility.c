@@ -8,6 +8,7 @@ int len(char* str) {
     return len;
 }
 int is(char* a, char* b) {
+    // if (len(a) != len(b)) return 0;
     while (*a && (*a == *b)) { a++; b++; }
     int out = *(unsigned char*)a - *(unsigned char*)b;
     if (out == 0) return 1;
@@ -62,13 +63,17 @@ void copyStr(char* target, char* source) {
     while (source[i] != '\0') { target[i] = source[i]; i++; }
     target[i] = '\0';
 }
+int contains(char* input, char whot) { int i = 0;  while (input[i] != '\0') { if (input[i] == whot) return 1; i++; } return 0; }
 void split(char* input, char delimiter, char* outA, char* outB) {
     int i = 0;
     int ia = 0;
     int ib = 0;
     int found = 0;
-    while (input[i] != '\0')
-    {
+    outA[0] = '\0';
+    outB[0] = '\0';
+    if (input == 0) return;
+    while (input[i] != '\0') {
+        if (ia >= 254 || ib >= 254) break;
         if (input[i] == delimiter && !found) { found = 1; }
         else if (!found) { outA[ia++] = input[i]; }
         else { outB[ib++] = input[i]; }

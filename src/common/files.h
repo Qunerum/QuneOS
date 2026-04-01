@@ -3,7 +3,6 @@
 
 #include "../kernel/kernel.h"
 
-#define QUNEFS_TABLE_SECTOR 12
 #define QUNEFS_DATA_START 20
 
 #pragma pack(push, 1)
@@ -22,6 +21,8 @@ void touch(char* name);
 void editFile(char* name, char* text);
 void catFile(char* name);
 void removeFile(char* name);
+void removeDir(char* name);
 void makeDir(char* name);
+void changeDir(char* name);
 
 #endif
