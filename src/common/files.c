@@ -3,7 +3,7 @@
 #include "../common/utility.h"
 
 extern char actualPath[STR_LEN * 4];
-uint32_t current_dir_lba = 12; // Domyślnie ROOT to sektor 12
+uint32_t current_dir_lba = 12;
 
 void ide_wait_ready() { while (inb(0x1F7) & 0x80); }
 
@@ -43,10 +43,10 @@ void listFiles() {
     QuneEntry* entries = (QuneEntry*)buf;
 
     for (int i = 0; i < 16; i++) {
-        if (entries[i].type == 1) { // Plik
+        if (entries[i].type == 1) {
             print("- "); print(entries[i].name); print("\n");
         }
-        else if (entries[i].type == 2) { // Folder
+        else if (entries[i].type == 2) {
             print("[DIR] "); print(entries[i].name); print("/\n");
         }
     }
@@ -79,10 +79,9 @@ void editFile(char* name, char* text) {
 
             int writePos = 0;
             for(int readPos = 0; text[readPos] != '\0' && writePos < 511; readPos++) {
-                // Jeśli znajdziemy \n w tekście
                 if (text[readPos] == '\\' && text[readPos+1] == 'n') {
-                    dataBuf[writePos++] = 10; // Dodaj bajt Nowej Linii (ASCII 10)
-                    readPos++; // Pomiń literę 'n'
+                    dataBuf[writePos++] = 10;
+                    readPos++;
                 } else {
                     dataBuf[writePos++] = text[readPos];
                 }
@@ -124,8 +123,7 @@ void removeFile(char* name) {
 
     for (int i = 0; i < 16; i++) {
         if (entries[i].type == 1 && is(entries[i].name, name)) {
-            entries[i].type = 0; // Oznaczamy jako wolny
-            // Opcjonalnie zerujemy nazwę, żeby w hex-podglądzie było czysto
+            entries[i].type = 0;
             for(int j=0; j<32; j++) entries[i].name[j] = 0;
 
             write_sector(current_dir_lba, buf);
@@ -153,21 +151,17 @@ void removeDir(char* name) {
 }
 void makeDir(char* name) {
     uint8_t buf[512];
-    read_sector(current_dir_lba, buf); // Czytamy AKTUALNY katalog
+    read_sector(current_dir_lba, buf);
     QuneEntry* entries = (QuneEntry*)buf;
 
     for (int i = 0; i < 16; i++) {
         if (entries[i].type == 0) {
-            // Znajdujemy wolny sektor dla nowego folderu
-            // Na razie prymitywnie: 20 + i (powinieneś mieć licznik wolnych sektorów!)
             uint32_t new_folder_lba = 30 + i;
 
-            // Czyścimy ten nowy sektor na dysku, żeby był pusty
             uint8_t empty[512];
             for(int j=0; j<512; j++) empty[j] = 0;
             write_sector(new_folder_lba, empty);
 
-            // Zapisujemy wpis w obecnym katalogu
             for(int j=0; j<32; j++) entries[i].name[j] = 0;
             for(int j=0; j<31 && name[j]; j++) entries[i].name[j] = name[j];
             entries[i].type = 2;
