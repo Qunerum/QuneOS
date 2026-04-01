@@ -13,5 +13,6 @@ int fndLast(char* a, char b);
 char* cutStart(char* str, int n);
 char* cutEnd(char* str, int n);
 void copyStr(char* target, char* source);
+void split(char* input, char delimiter, char* outA, char* outB);
 
 #endif

@@ -14,6 +14,7 @@ uint16_t inw(uint16_t port) {
     __asm__ volatile("inw %1, %0" : "=a"(result) : "Nd"(port));
     return result;
 }
+void outw(unsigned short port, uint16_t val) { asm volatile ( "outw %0, %1" : : "a"(val), "Nd"(port) ); }
 
 void update_cursor() {
     unsigned short pos = cursorY * 80 + cursorX;

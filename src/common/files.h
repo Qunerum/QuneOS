@@ -1,16 +1,27 @@
 #ifndef FILES_H
 #define FILES_H
 
-#define MAX_ENTRIES 256
-#define NAME_LEN 32
+#include "../kernel/kernel.h"
 
-typedef struct FileNode {
-    char name[NAME_LEN];
-    int isDirectory;
-    char* content;
-    int size;
-    struct FileNode* children[MAX_ENTRIES];
-    int entryCount;
-} FileNode;
+#define QUNEFS_TABLE_SECTOR 12
+#define QUNEFS_DATA_START 20
+
+#pragma pack(push, 1)
+typedef struct {
+    char name[32];
+    uint8_t type;
+    uint32_t start_lba;
+    uint32_t size;
+} QuneEntry;
+#pragma pack(pop)
+
+void read_sector(uint32_t lba, uint8_t* buffer);
+void write_sector(uint32_t lba, uint8_t* buffer);
+void listFiles();
+void touch(char* name);
+void editFile(char* name, char* text);
+void catFile(char* name);
+void removeFile(char* name);
+void makeDir(char* name);
 
 #endif

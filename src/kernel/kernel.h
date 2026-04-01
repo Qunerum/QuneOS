@@ -20,6 +20,7 @@
 #define WHITE          0x0F
 #define MKCLR(fg, bg) ((bg << 4) | fg)
 
+#define STR_LEN 256
 
 typedef unsigned char      uint8_t;
 typedef unsigned short     uint16_t;

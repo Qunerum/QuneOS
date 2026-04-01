@@ -1,14 +1,15 @@
 #include "kernel.h"
+// #include "../common/files.h"
 #include "../common/utility.h"
 #include "../common/terminal.h"
 #include "../common/terminalCMDs.h"
 
-char actualPath[512] = "*";
+char actualPath[STR_LEN * 4] = "*";
 
 void logStart(char* msg, int state)
 {
     if (state) { printc(msg, LIGHT_GREEN); } else { printc(msg, LIGHT_RED); }
-    for (int i = 0; i < 50 - len(msg); i++) { printc(".", DARK_GRAY); }
+    for (int i = 0; i < 69 - len(msg); i++) { printc(".", DARK_GRAY); }
     print(" [ ");
     if (state) { printc(" OK ", LIGHT_GREEN); } else { printc("ERR!", LIGHT_RED); }
     print(" ] \n");
@@ -24,7 +25,7 @@ void kmain() {
     logStart("Kernel Memory", 1);
     logStart("Keyboard Driver", 1);
     logStart("VGA Text Mode", 1);
-    logStart("File System", 0);
+    logStart("File System", 1);
     logStart("Applications (1/1):", 1);
     logStart("- Terminal", 1);
 

@@ -1,4 +1,4 @@
-// #include "../kernel/kernel.h"
+#include "../kernel/kernel.h"
 #include "utility.h"
 
 void delay(int count) { for (volatile int i = 0; i < count * 100000; i++) { } }
@@ -17,11 +17,11 @@ int startsWith(char* str, char* prefix) {
     while (*prefix) { if (*prefix++ != *str++) return 0; }
     return 1;
 }
-static char result_buffer[512];
+static char result_buffer[STR_LEN];
 char* addStr(char* a, char* b) {
     int i = 0, j = 0;
-    while (a[i] != '\0' && i < 511) { result_buffer[i] = a[i]; i++; }
-    while (b[j] != '\0' && i < 511) { result_buffer[i] = b[j]; i++; j++; }
+    while (a[i] != '\0' && i < STR_LEN - 1) { result_buffer[i] = a[i]; i++; }
+    while (b[j] != '\0' && i < STR_LEN - 1) { result_buffer[i] = b[j]; i++; j++; }
     result_buffer[i] = '\0';
     return result_buffer;
 }
@@ -61,4 +61,19 @@ void copyStr(char* target, char* source) {
     int i = 0;
     while (source[i] != '\0') { target[i] = source[i]; i++; }
     target[i] = '\0';
+}
+void split(char* input, char delimiter, char* outA, char* outB) {
+    int i = 0;
+    int ia = 0;
+    int ib = 0;
+    int found = 0;
+    while (input[i] != '\0')
+    {
+        if (input[i] == delimiter && !found) { found = 1; }
+        else if (!found) { outA[ia++] = input[i]; }
+        else { outB[ib++] = input[i]; }
+        i++;
+    }
+    outA[ia] = '\0';
+    outB[ib] = '\0';
 }
