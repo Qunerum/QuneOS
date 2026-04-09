@@ -3,8 +3,9 @@
 #include "../common/utility.h"
 #include "../common/terminal.h"
 #include "../common/terminalCMDs.h"
+#include "memory.h"
 
-char actualPath[STR_LEN * 4] = "*";
+char* actualPath;
 
 void logStart(char* msg, int state)
 {
@@ -39,6 +40,9 @@ void kmain() {
     printb("  ", LIGHT_RED); printb("  ", LIGHT_MAGENTA); printb("  ", YELLOW); printb("  ", WHITE); print("|\n");
     print("\\--------------------------------/\n\n");
     printcb("[ SYSTEM LOADED ]\n\n", WHITE, GREEN);
+
+    actualPath = (char*)kmalloc(STR_LEN);
+    copyStr(actualPath, "*");
 
     char cmd[CMD_MAX];
     while(1)

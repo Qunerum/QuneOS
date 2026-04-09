@@ -1,6 +1,7 @@
 #include "files.h"
 #include "terminal.h"
 #include "../common/utility.h"
+#include "../kernel/memory.h"
 
 extern char actualPath[STR_LEN * 4];
 uint32_t current_dir_lba = 12;
@@ -57,7 +58,8 @@ void touch(char* name) {
     QuneEntry* entries = (QuneEntry*)buf;
     for (int i = 0; i < 512 / sizeof(QuneEntry); i++) {
         if (entries[i].type == 0) {
-            for(int j=0; j<32; j++) entries[i].name[j] = 0;
+            uint8_t* entry_ptr = (uint8_t*)&entries[i];
+            for(int j=0; j<sizeof(QuneEntry); j++) entry_ptr[j] = 0;
             for(int j=0; j<31 && name[j]; j++) entries[i].name[j] = name[j];
             entries[i].type = 1;
             entries[i].start_lba = QUNEFS_DATA_START + i;
@@ -74,40 +76,49 @@ void editFile(char* name, char* text) {
 
     for (int i = 0; i < 16; i++) {
         if (entries[i].type == 1 && is(entries[i].name, name)) {
-            uint8_t dataBuf[512];
-            for(int j = 0; j < 512; j++) dataBuf[j] = 0;
+            // Zamiast uint8_t dataBuf[512], używamy kmalloc
+            uint8_t* dataBuf = (uint8_t*)kmalloc(512);
 
-            int writePos = 0;
-            for(int readPos = 0; text[readPos] != '\0' && writePos < 511; readPos++) {
-                if (text[readPos] == '\\' && text[readPos+1] == 'n') {
-                    dataBuf[writePos++] = 10;
-                    readPos++;
-                } else {
-                    dataBuf[writePos++] = text[readPos];
-                }
+            // Kopiujemy tekst do naszego nowego bufora na stercie
+            for (int j = 0; j < 512; j++) dataBuf[j] = 0; // Czyszczenie
+            for (int j = 0; j < 511 && text[j]; j++) {
+                dataBuf[j] = text[j];
             }
 
+            // Zapisujemy na dysk
             write_sector(entries[i].start_lba, dataBuf);
-            print("Zapisano z obsluga linii.\n");
+
+            print("Zapisano zmiany w pliku: ");
+            print(name);
+            print("\n");
             return;
         }
     }
-    print("Nie znaleziono pliku.\n");
+    printc("Blad: Nie mozna edytowac. Nie znaleziono pliku: ", LIGHT_RED);
+    print(name);
+    print("\n");
 }
 void catFile(char* name) {
+    // Bufor na wpisy w katalogu (może zostać na stosie, bo jest mały i krótko używany)
     uint8_t tableBuf[512];
     read_sector(current_dir_lba, tableBuf);
     QuneEntry* entries = (QuneEntry*)tableBuf;
 
     for (int i = 0; i < 16; i++) {
         if (entries[i].type == 1 && is(entries[i].name, name)) {
-            uint8_t dataBuf[512];
+            // DYNAMICZNA ALOKACJA: prosimy o 512 bajtów ze sterty
+            uint8_t* dataBuf = (uint8_t*)kmalloc(512);
 
+            // Czytamy dane do zaalokowanej pamięci
             read_sector(entries[i].start_lba, dataBuf);
 
             print(name); print(" contents:\n");
             printc((char*)dataBuf, LIGHT_CYAN);
             print("\n");
+
+            // W naszym prostym kmalloc nie mamy free(),
+            // więc pamięć zostaje zajęta do restartu,
+            // ale przy 512 bajtach i megabajtach RAMu to nie problem.
             return;
         }
     }

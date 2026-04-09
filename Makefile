@@ -7,6 +7,7 @@ CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -I.
 
 OBJ = bin/boot.o \
       bin/kernel.o \
+      bin/memory.o \
       bin/utility.o \
       bin/terminal.o \
       bin/terminalCMDs.o \
@@ -32,7 +33,7 @@ $(BIN): $(OBJ)
 	$(LD) $(LDFLAGS) $(OBJ) -o $(BIN)
 
 run: $(BIN)
-	qemu-system-i386 -kernel $(BIN) -drive file=disk.img,format=raw,if=ide -net none
+	sudo qemu-system-i386 -kernel $(BIN) -hda /dev/sda -net none
 
 clean:
 	rm -rf bin/

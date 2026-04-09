@@ -65,18 +65,14 @@ void copyStr(char* target, char* source) {
 }
 int contains(char* input, char whot) { int i = 0;  while (input[i] != '\0') { if (input[i] == whot) return 1; i++; } return 0; }
 void split(char* input, char delimiter, char* outA, char* outB) {
-    int i = 0;
-    int ia = 0;
-    int ib = 0;
-    int found = 0;
+    int i = 0, ia = 0, ib = 0, found = 0;
     outA[0] = '\0';
     outB[0] = '\0';
-    if (input == 0) return;
+    if (input == 0 || input[0] == '\0') return;
     while (input[i] != '\0') {
-        if (ia >= 254 || ib >= 254) break;
         if (input[i] == delimiter && !found) { found = 1; }
-        else if (!found) { outA[ia++] = input[i]; }
-        else { outB[ib++] = input[i]; }
+        else if (!found) { if (ia < STR_LEN - 1) outA[ia++] = input[i]; }
+        else { if (ib < STR_LEN - 1) outB[ib++] = input[i]; }
         i++;
     }
     outA[ia] = '\0';

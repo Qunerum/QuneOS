@@ -3,45 +3,61 @@
 #include "terminal.h"
 #include "terminalCMDs.h"
 
-extern char actualPath[STR_LEN * 4];
+extern char* actualPath;
 
-void help_qc(char* args) { for (int i = 0; i < cmd_count; i++) { printq("- %s\n", cmds[i]); } }
-void cd_qc(char* args) { changeDir(args); }
-void ls_qc(char* args) { listFiles(); }
-void touch_qc(char* args) { touch(args); }
-void rm_qc(char* args) { removeFile(args); }
-void mkDir_qc(char* args) { makeDir(args); }
-void rmDir_qc(char* args) { removeDir(args); }
-void write_qc(char* args) {
-    char a[STR_LEN];
-    char b[STR_LEN];
-    split(args, ' ', a, b);
-    editFile(a, b);
+int has_permission() {
+    if (is(actualPath, "*")) {
+        printc("Access Denied: Cannot modify system directory (*)\n", LIGHT_RED);
+        return 0;
+    }
+    return 1;
 }
-void cat_qc(char* args) { catFile(args); }
 
-void echo_qc(char* args) { printq("%s\n", args); }
-void clear_qc(char* args) { clear(); }
-//void _qc(char* args) { }
-//void _qc(char* args) { }
-//void _qc(char* args) { }
-//void _qc(char* args) { }
-//void _qc(char* args) { }
+void help_qc(char* args) { for (int i = 0; i < cmd_count; i++) { printq("- %s\n", cmds[i].cmd); } } // help
+
+void look_qc(char* args) { listFiles(); } // look
+void view_qc(char* args) { catFile(args); } // view file
+void newFile_qc(char* args) { if (has_permission()) touch(args); } // create new file
+void write_qc(char* args) {
+     if (has_permission())
+     {
+        char a[STR_LEN];
+        char b[STR_LEN];
+        split(args, ' ', a, b);
+        editFile(a, b);
+     }
+} // write file
+void build_qc(char* args) { if (has_permission()) makeDir(args); } // create new dir
+void cd_qc(char* args) { changeDir(args); } // change direction
+void erase_qc(char* args) { if (has_permission()) removeFile(args); } // remove file
+void destruct_qc(char* args) { if (has_permission()) removeDir(args); } // remove dir
+void echo_qc(char* args) { printq("%s\n", args); } // print in terminal
+void clear_qc(char* args) { clear(); } // clear terminal
+void mmr_qc(char* args) {
+    extern unsigned long get_heap_pointer();
+    unsigned long current = get_heap_pointer();
+    unsigned long base = 0x200000;
+
+    printc("--- QuneOs Memory Report ---\n", LIGHT_MAGENTA);
+    print("Heap Base: "); printHex(base);
+    print("\nHeap Curr: "); printHex(current);
+    print("\nAllocated: "); printInt(current - base); print(" bytes\n");
+}
 //void _qc(char* args) { }
 
 
 TerminalCMD cmds[] = {
     {"help", help_qc},
+    {"look", look_qc},
+    {"view", view_qc},
+    {"new", newFile_qc},
+    {"write", write_qc},
+    {"build", build_qc},
     {"cd", cd_qc},
-    {"ls", ls_qc},
-    {"touch", touch_qc},
-    {"rm", rm_qc},
-    {"mkdir", mkDir_qc},
-    {"rmdir", rmDir_qc},
-    {"edit", write_qc},
-    {"cat", cat_qc},
-
+    {"erase", erase_qc},
+    {"destruct", destruct_qc},
     {"echo", echo_qc},
-    {"clear", clear_qc}
+    {"clear", clear_qc},
+    {"mmr", mmr_qc}
 };
 int cmd_count = sizeof(cmds) / sizeof(TerminalCMD);
