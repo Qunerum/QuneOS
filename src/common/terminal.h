@@ -16,12 +16,15 @@ void outw(unsigned short port, uint16_t val);
 
 void add_to_history(char* cmd);
 void readLine(char* buffer, int maxLength);
+void readPass(char* buffer, int maxLength);
 
 void clear();
 void printcb(char* msg, char clr, char bck);
 void printb(char* msg, char back);
 void printc(char* msg, char clr);
 void print(char* msg);
+void println(char* msg);
+void printlne();
 
 void printcbInt(int n, char clr, char bck);
 void printbInt(int n, char back);

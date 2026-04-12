@@ -7,6 +7,12 @@ int len(char* str) {
     while (str[len] != '\0') { len++; }
     return len;
 }
+int leni(char* str, char ignore) {
+    int i = 0;
+    int len = 0;
+    while (str[i] != '\0') { if (str[i] != ignore) { len++; } i++; }
+    return len;
+}
 int is(char* a, char* b) {
     // if (len(a) != len(b)) return 0;
     while (*a && (*a == *b)) { a++; b++; }

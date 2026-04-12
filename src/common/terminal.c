@@ -75,18 +75,20 @@ void add_to_history(char* cmd) {
         history_count++;
     }
 }
-void readLine(char* buffer, int maxLength) {
+void read(char* buffer, int maxLength, char mask) {
     int i = 0;
     showCursor();
     int temp_history_index = -1;
+
     while (i < maxLength - 1) {
         char c = get_char();
         if (c == 0) continue;
+
         if (c == 0x48 || c == 0x50) {
+            if (mask != ' ') continue;
             if (history_count == 0) continue;
             if (c == 0x48) { if (temp_history_index < history_count - 1) temp_history_index++; }
             else { if (temp_history_index > -1) temp_history_index--; }
-
             while (i > 0) { i--; cursorX--; print(" "); cursorX--; }
             if (temp_history_index == -1) { buffer[0] = '\0'; i = 0; } else {
                 int pos = (current_history_pos - 1 - temp_history_index + HISTORY_MAX) % HISTORY_MAX;
@@ -101,7 +103,7 @@ void readLine(char* buffer, int maxLength) {
             update_cursor();
             continue;
         }
-        if (c == '\n') {  print("\n"); break; }
+        if (c == '\n') { print("\n"); break; }
         if (c == '\b') {
             if (i > 0) {
                 i--;
@@ -114,11 +116,12 @@ void readLine(char* buffer, int maxLength) {
         }
         temp_history_index = -1;
         buffer[i++] = c;
-        char s[2] = {c, '\0'};
-        print(s);
+        if (mask == ' ') { char s[2] = {c, '\0'}; print(s); } else { char s[2] = {mask, '\0'}; print(s); }
     }
     buffer[i] = '\0';
 }
+void readLine(char* buffer, int maxLen) { read(buffer, maxLen, ' '); }
+void readPass(char* buffer, int maxLen) { read(buffer, maxLen, '*'); }
 
 void clear()
 {
@@ -146,6 +149,8 @@ void printcb(char* msg, char clr, char bck)
 void printb(char* msg, char clr) { printcb(msg, LIGHT_GRAY, clr); }
 void printc(char* msg, char clr) { printcb(msg, clr, BLACK); }
 void print(char* msg) { printc(msg, LIGHT_GRAY); }
+void println(char* msg) { printc(msg, LIGHT_GRAY); printc("\n", LIGHT_GRAY); }
+void printlne() { printc("\n", LIGHT_GRAY); }
 
 void printcbInt(int n, char clr, char bck) {
     if (n == 0) { printcb("0", clr, bck); return; }

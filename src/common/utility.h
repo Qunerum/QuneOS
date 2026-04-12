@@ -3,6 +3,7 @@
 
 void delay(int count);
 int len(char* str);
+int leni(char* str, char ignore);
 int is(char* a, char* b);
 int startsWith(char* str, char* prefix);
 char* addStr(char* a, char* b);

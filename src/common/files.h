@@ -16,6 +16,8 @@ typedef struct {
 
 void read_sector(uint32_t lba, uint8_t* buffer);
 void write_sector(uint32_t lba, uint8_t* buffer);
+int exists(char* name);
+char* readFile(char* name);
 void listFiles();
 void touch(char* name);
 void editFile(char* name, char* text);
