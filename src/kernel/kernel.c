@@ -136,6 +136,4 @@ void kmain() {
         if (len(cmd) > 0) { add_to_history(cmd); }
         runCmd(cmd);
     }
-    kfree(currentUser);
-    kfree(cud);
 }
