@@ -1,3 +1,5 @@
+#include "../kernel/kernel.h"
+#include "../kernel/memory.h"
 #include "files.h"
 #include "utility.h"
 #include "terminal.h"
@@ -34,17 +36,13 @@ void destruct_qc(char* args) { if (has_permission()) removeDir(args); } // remov
 void echo_qc(char* args) { printq("%s\n", args); } // print in terminal
 void clear_qc(char* args) { clear(); } // clear terminal
 void mmr_qc(char* args) {
-    extern unsigned long get_heap_pointer();
-    unsigned long current = get_heap_pointer();
-    unsigned long base = 0x200000;
-
-    printc("--- QuneOs Memory Report ---\n", LIGHT_MAGENTA);
-    print("Heap Base: "); printHex(base);
-    print("\nHeap Curr: "); printHex(current);
-    print("\nAllocated: "); printInt(current - base); print(" bytes\n");
+    unsigned long used = get_heap_usage();
+    print("Memory used: ");
+    printInt(used);
+    print(" bytes\n");
+    print("Heap start: 0x200000\n");
 }
-//void _qc(char* args) { }
-
+void quit_qc(char* args) { printc("Shutting down QuneOS...\n", LIGHT_RED); powerOff(); }
 
 TerminalCMD cmds[] = {
     {"help", help_qc},
@@ -58,6 +56,7 @@ TerminalCMD cmds[] = {
     {"destruct", destruct_qc},
     {"echo", echo_qc},
     {"clear", clear_qc},
-    {"mmr", mmr_qc}
+    {"mmr", mmr_qc},
+    {"quit", quit_qc}
 };
 int cmd_count = sizeof(cmds) / sizeof(TerminalCMD);

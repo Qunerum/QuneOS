@@ -6,12 +6,12 @@ LDFLAGS = -m elf_i386 -T linker.ld
 CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -I.
 
 OBJ = bin/boot.o \
+      bin/files.o \
       bin/kernel.o \
       bin/memory.o \
       bin/utility.o \
       bin/terminal.o \
       bin/terminalCMDs.o \
-      bin/files.o
 
 BIN = bin/qos-kernel.bin
 

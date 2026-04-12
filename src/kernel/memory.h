@@ -1,17 +1,18 @@
+// memory.h
 #ifndef MEMORY_H
 #define MEMORY_H
 
 typedef unsigned int size_t;
 
-// Struktura opisująca każdy blok pamięci na stercie
 typedef struct MemoryBlock {
-    size_t size;            // Rozmiar dostępnej pamięci (bez nagłówka)
-    int free;               // 1 jeśli wolny, 0 jeśli zajęty
-    struct MemoryBlock* next; // Wskaźnik na następny blok
+    size_t size;
+    int free;
+    struct MemoryBlock* next;
 } MemoryBlock;
 
-void init_memory();         // Musisz to wywołać raz w kmain!
+void init_memory();
 void* kmalloc(size_t size);
 void kfree(void* ptr);
+unsigned long get_heap_usage();
 
 #endif

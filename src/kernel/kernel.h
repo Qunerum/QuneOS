@@ -33,4 +33,6 @@ typedef int                int32_t;
 
 typedef unsigned long uintptr_t;
 
+void powerOff();
+
 #endif

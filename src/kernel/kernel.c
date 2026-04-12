@@ -41,7 +41,16 @@ void createUser()
     editFile(usr, addStr(addStr(name, "\n"), pass));
 
     editFile("sys", intToStr(strToInt(readFile("sys")) + 1));
+}
+void powerOff() {
+    // QEMU
+    outw(0x604, 0x2000);
+    outw(0x4004, 0x3400);
 
+    clear();
+    printc("System Halted.\n", LIGHT_CYAN);
+    print("You can now safely turn off your computer.");
+    while(1) { __asm__("cli; hlt"); }
 }
 void kmain() {
     clear();
@@ -76,9 +85,9 @@ void kmain() {
         int usrCount = strToInt(readFile("sys"));
         char* name = (char*)kmalloc(33);
         char* pass = (char*)kmalloc(33);
+        char* id = (char*)kmalloc(36);
         for (int i = 0; i < usrCount; i++)
         {
-            char* id = (char*)kmalloc(36);
             copyStr(id, addStr("usr", intToStr(i)));
             char* fl = readFile(id);
             split(fl, '\n', name, pass);
@@ -87,7 +96,6 @@ void kmain() {
         }
         int success = 0;
         char* u = (char*)kmalloc(17);
-        char* id = (char*)kmalloc(36);
         char* enPass = (char*)kmalloc(33);
         while (!success)
         {
@@ -107,7 +115,7 @@ void kmain() {
                 while (!sucPass)
                 {
                     print("Enter password: "); readPass(enPass, 32);
-                    if (is(enPass, pass)) { printc("Successfuly logged!\n", LIGHT_GREEN); sucPass = 1; } else { printc("Wrong password! Try again.\n\n", LIGHT_RED); }
+                    if (is(enPass, pass)) { printc("Successfuly logged!\n", LIGHT_GREEN); copyStr(currentUser, name); sucPass = 1; } else { printc("Wrong password! Try again.\n\n", LIGHT_RED); }
                 }
                 success = 1;
             }
@@ -115,6 +123,8 @@ void kmain() {
         kfree(u);
         kfree(id);
         kfree(enPass);
+        kfree(name);
+        kfree(pass);
     }
 
     char cmd[CMD_MAX];
