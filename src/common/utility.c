@@ -84,3 +84,12 @@ void split(char* input, char delimiter, char* outA, char* outB) {
     outA[ia] = '\0';
     outB[ib] = '\0';
 }
+void shortTo(char* out, char* in, int to) {
+    if (to <= 3) { copyStr(out, ""); return; }
+    if (len(in) <= to) { copyStr(out, in); return; }
+    int o = to - 3;
+    int i = 0;
+    for (i = 0; i < o; i++) { out[i] = in[i]; }
+    for (int x = 0; x < 3; x++) { out[i + x] = '.'; }
+    out[i + 3] = '\0';
+}

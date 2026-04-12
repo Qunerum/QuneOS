@@ -45,6 +45,7 @@ void createUser()
 }
 void kmain() {
     clear();
+    init_memory();
     logStart("Kernel Memory", 1);
     logStart("Keyboard Driver", 1);
     logStart("VGA Text Mode", 1);
@@ -62,6 +63,8 @@ void kmain() {
     printb("  ", LIGHT_RED); printb("  ", LIGHT_MAGENTA); printb("  ", YELLOW); printb("  ", WHITE); print("|\n");
     println("\\--------------------------------/\n");
     printcb("[ SYSTEM LOADED ]\n\n", WHITE, GREEN);
+
+    char* currentUser = (char*)kmalloc(33);
 
     if (!exists("sys")) {
         println("Error! Wygląda na to że to twoje pierwsze uruchomienie");
@@ -89,8 +92,7 @@ void kmain() {
         while (!success)
         {
             println("\n(Enter to login user ID 0)");
-            print("Login as: ");
-            readLine(u, 16);
+            print("Login as: "); readLine(u, 16);
             int ui = 0;
             if (leni(u, ' ') >= 1) ui = strToInt(u);
             if (ui >= usrCount)
@@ -104,28 +106,26 @@ void kmain() {
                 int sucPass = 0;
                 while (!sucPass)
                 {
-                    print("Enter password: ");
-                    readPass(enPass, 32);
-                    if (is(enPass, pass))
-                    {
-                        printc("Successfuly logged!\n", LIGHT_GREEN);
-                        sucPass = 1;
-                    } else
-                    {
-                        printc("Wrong password! Try again.\n\n", LIGHT_RED);
-                    }
+                    print("Enter password: "); readPass(enPass, 32);
+                    if (is(enPass, pass)) { printc("Successfuly logged!\n", LIGHT_GREEN); sucPass = 1; } else { printc("Wrong password! Try again.\n\n", LIGHT_RED); }
                 }
                 success = 1;
             }
         }
-
+        kfree(u);
+        kfree(id);
+        kfree(enPass);
     }
 
     char cmd[CMD_MAX];
+    char* cud = (char*)kmalloc(14);
+    shortTo(cud, currentUser, 13);
     while(1) {
-        printc("'", GREEN); printc(actualPath, WHITE); printc("'", GREEN); print(": ");
+        printq("%s: ", cud); printc("'", GREEN); printc(actualPath, WHITE); printc("'", GREEN); print(": ");
         readLine(cmd, CMD_MAX);
         if (len(cmd) > 0) { add_to_history(cmd); }
         runCmd(cmd);
     }
+    kfree(currentUser);
+    kfree(cud);
 }

@@ -16,5 +16,6 @@ char* cutEnd(char* str, int n);
 void copyStr(char* target, char* source);
 int contains(char* input, char whot);
 void split(char* input, char delimiter, char* outA, char* outB);
+void shortTo(char* out, char* in, int to);
 
 #endif
