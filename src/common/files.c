@@ -85,7 +85,7 @@ void touch(char* name) {
             entries[i].type = 1;
             entries[i].start_lba = QUNEFS_DATA_START + (current_dir_lba * 16) + i;
             write_sector(current_dir_lba, buf);
-            print("Plik utworzony.\n");
+            print("File created.\n");
             return;
         }
     }
@@ -101,7 +101,7 @@ void editFile(char* name, char* text) {
             uint8_t* dataBuf = (uint8_t*)kmalloc(512);
             for (int j = 0; j < 511 && text[j]; j++) dataBuf[j] = text[j];
             write_sector(entries[i].start_lba, dataBuf);
-            print("Zapisano.\n");
+            print("Saved.\n");
             return;
         }
     }
@@ -133,7 +133,7 @@ void removeFile(char* name) {
             entries[i].type = 0;
             for(int j=0; j<32; j++) entries[i].name[j] = 0;
             write_sector(current_dir_lba, buf);
-            print("Usunieto plik.\n");
+            print("File removed.\n");
             return;
         }
     }
@@ -149,7 +149,7 @@ void removeDir(char* name) {
             entries[i].type = 0;
             for(int j=0; j<32; j++) entries[i].name[j] = 0;
             write_sector(current_dir_lba, buf);
-            print("Usunieto folder.\n");
+            print("Directory removed.\n");
             return;
         }
     }
@@ -175,7 +175,7 @@ void makeDir(char* name) {
             entries[i].start_lba = new_folder_lba;
 
             write_sector(current_dir_lba, buf);
-            print("Folder utworzony.\n");
+            print("Directory created.\n");
             return;
         }
     }
@@ -185,7 +185,6 @@ void changeDir(char* name) {
     if (is(name, "*")) {
         current_dir_lba = 12;
         copyStr(actualPath, "*");
-        print("Root.\n");
         return;
     }
 

@@ -18,11 +18,10 @@ int has_permission() {
 void help_qc(char* args) { for (int i = 0; i < cmd_count; i++) { printq("- %s\n", cmds[i].cmd); } } // help
 
 void look_qc(char* args) { listFiles(); } // look
-void view_qc(char* args) { catFile(args); } // view file
+void view_qc(char* args) { if (has_permission()) catFile(args); } // view file
 void newFile_qc(char* args) { if (has_permission()) touch(args); } // create new file
 void write_qc(char* args) {
-     if (has_permission())
-     {
+     if (has_permission()) {
         char a[STR_LEN];
         char b[STR_LEN];
         split(args, ' ', a, b);
@@ -37,9 +36,7 @@ void echo_qc(char* args) { printq("%s\n", args); } // print in terminal
 void clear_qc(char* args) { clear(); } // clear terminal
 void mmr_qc(char* args) {
     unsigned long used = get_heap_usage();
-    print("Memory used: ");
-    printInt(used);
-    print(" bytes\n");
+    print("Memory used: "); printInt(used); print(" bytes\n");
     print("Heap start: 0x200000\n");
 }
 void quit_qc(char* args) { printc("Shutting down QuneOS...\n", LIGHT_RED); powerOff(); }
