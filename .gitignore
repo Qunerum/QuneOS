@@ -1,3 +1,6 @@
 bin/
 *.sh
 disk/
+iso/
+iso/boot/
+quneos.iso
