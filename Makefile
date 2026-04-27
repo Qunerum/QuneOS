@@ -33,7 +33,7 @@ $(BIN): $(OBJ)
 	$(LD) $(LDFLAGS) $(OBJ) -o $(BIN)
 
 run: $(BIN)
-	sudo qemu-system-i386 -kernel $(BIN) -hda /dev/sda -net none
+	sudo qemu-system-i386 -hda /dev/sda -m 256M
 
 clean:
 	rm -rf bin/
