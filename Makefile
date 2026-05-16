@@ -1,39 +1,32 @@
+SRC = src
+BIN = bin
+
+SOURCES = $(shell find $(SRC) -name "*.c")
+OBJS = $(patsubst $(SRC)/%.c, $(BIN)/%.o, $(SOURCES))
+
 CC = gcc
-AS = nasm
-LD = ld
+CFLAGS = -m32 -ffreestanding -fno-pie -fno-stack-protector -nostdlib -I$(SRC) -std=gnu99
 
-LDFLAGS = -m elf_i386 -T linker.ld
-CFLAGS = -m32 -ffreestanding -fno-stack-protector -nostdlib -I.
+all: $(BIN)/os-image.bin
 
-OBJ = 	bin/boot.o \
-	bin/files.o \
-	bin/kernel.o \
-	bin/memory.o \
-	bin/utility.o \
-	bin/terminal.o \
-	bin/terminalCMDs.o \
+$(BIN)/bootloader.bin: $(SRC)/boot/bootloader.asm
+	@mkdir -p $(dir $@)
+	nasm -f bin $< -o $@
 
-BIN = bin/qos-kernel.bin
-
-all: $(BIN)
-
-bin/boot.o: src/boot/boot.asm
-	mkdir -p bin
-	$(AS) -f elf32 src/boot/boot.asm -o bin/boot.o
-
-bin/%.o: src/kernel/%.c
-	mkdir -p bin
+$(BIN)/%.o: $(SRC)/%.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-bin/%.o: src/common/%.c
-	mkdir -p bin
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BIN)/kernel.bin: $(OBJS)
+	ld -m elf_i386 -T linker.ld -nostdlib --oformat binary -S $^ -o $@
 
-$(BIN): $(OBJ)
-	$(LD) $(LDFLAGS) $(OBJ) -o $(BIN)
+$(BIN)/os-image.bin: $(BIN)/bootloader.bin $(BIN)/kernel.bin
+	dd if=/dev/zero of=$(BIN)/os-image.bin bs=512 count=2880
+	dd if=$(BIN)/bootloader.bin of=$(BIN)/os-image.bin conv=notrunc
+	dd if=$(BIN)/kernel.bin of=$(BIN)/os-image.bin seek=1 conv=notrunc
 
-run: $(BIN)
-	sudo qemu-system-i386 -hda /dev/sda -m 256M
+run: all
+	qemu-system-i386 -drive format=raw,file=$(BIN)/os-image.bin,if=floppy -vga std -m 256M
 
 clean:
-	rm -rf bin/
+	rm -rf $(BIN)

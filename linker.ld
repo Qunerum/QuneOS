@@ -1,28 +1,12 @@
 ENTRY(_start)
-
 SECTIONS
 {
-    . = 1M;
-
-    .text BLOCK(4K) : ALIGN(4K)
-    {
-        *(.multiboot)
+    . = 0x1000;
+    .text : {
+        *(.text.prologue)
         *(.text)
     }
-
-    .rodata BLOCK(4K) : ALIGN(4K)
-    {
-        *(.rodata)
-    }
-
-    .data BLOCK(4K) : ALIGN(4K)
-    {
-        *(.data)
-    }
-
-    .bss BLOCK(4K) : ALIGN(4K)
-    {
-        *(COMMON)
-        *(.bss)
-    }
+    .data : { *(.data) }
+    .bss  : { *(.bss)  }
+    /DISCARD/ : { *(.comment) *(.note*) }
 }

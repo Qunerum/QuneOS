@@ -1,6 +1,3 @@
 bin/
-*.sh
-disk/
-iso/
-iso/boot/
-quneos.iso
+build/
+compile_flags.txt
