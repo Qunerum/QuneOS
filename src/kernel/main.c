@@ -1,5 +1,4 @@
 #include "../drivers/screen.h"
-// #include "../lib/math.h"
 
 __attribute__((section(".text.prologue")))
 void _start() {
@@ -13,8 +12,7 @@ void _start() {
     }
     initScreen(vbe);
 
-    draw_circle(0, 0, 150, 2, -90, 0, 0x00FF00);
-    draw_text(0, 0, "ABa", 0xCCCCCC, 2);
+    draw_text(-ScreenX + 10, ScreenY - 10, "Welcome to QuneOS!", 1, 0xCCCCCC);
 
     while(1);
 }

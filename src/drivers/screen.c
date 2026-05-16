@@ -1,11 +1,12 @@
 #include "../lib/math.h"
+// #include "../lib/text.h"
 #include "screen.h"
 #include "font.h"
 
 struct vbe_mode_info* vbe;
-int cx = 0, cy = 0;
-void initScreen(struct vbe_mode_info* v) { vbe = v; cx = vbe->width / 2; cy = vbe->height / 2; }
-void calcPos(int x, int y, int* xo, int* yo) { *xo = cx + x; *yo = cy - y; }
+int ScreenX = 0, ScreenY = 0;
+void initScreen(struct vbe_mode_info* v) { vbe = v; ScreenX = vbe->width / 2; ScreenY = vbe->height / 2; }
+void calcPos(int x, int y, int* xo, int* yo) { *xo = ScreenX + x; *yo = ScreenY - y; }
 
 void draw_pixel(int x, int y, uint32_t color) {
     calcPos(x, y, &x, &y);
@@ -70,12 +71,12 @@ void draw_char(int x, int y, char c, uint32_t color, int scale) {
             if (bitmap[row] & (0x80 >> col)) { for (int sy = 0; sy < scale; sy++) {
                     for (int sx = 0; sx < scale; sx++) { draw_pixel(x + (col * scale) + sx, y - (row * scale) - sy, color); } } } } }
 }
-
-void draw_text(int x, int y, const char* str, uint32_t color, int scale) {
+void draw_text(int x, int y, char* str, int scale, uint32_t color) {
+    int sx = x;
     while (*str) {
-        if (*str == '\n') { y -= (9 * scale); continue; }
+        if (*str == '\n') { y -= (8 * scale); x = sx; str++; continue; }
         draw_char(x, y, *str, color, scale);
-        x += (9 * scale);
+        x += (8 * scale);
         str++;
     }
 }
