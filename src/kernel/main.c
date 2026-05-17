@@ -1,4 +1,6 @@
 #include "../drivers/screen.h"
+#include "../drivers/keyboard.h"
+#include "terminal.h"
 
 __attribute__((section(".text.prologue")))
 void _start() {
@@ -11,8 +13,10 @@ void _start() {
         vbe->height = 768;
     }
     initScreen(vbe);
+    initKeyboard();
 
-    draw_text(-ScreenX + 10, ScreenY - 10, "Welcome to QuneOS!", 1, 0xCCCCCC);
+    print("Hello!\n", 0xCCCCCC);
+    print("Welcome to QuneOS!\nS\b\b\b\b", 0xCCCCCC);
 
     while(1);
 }

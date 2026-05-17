@@ -49,6 +49,14 @@ void draw_line(int x1, int y1, int x2, int y2, int thickness, uint32_t color) {
         if (e2 <= dx) { err += dx; y1 += sy; }
     }
 }
+// = = = = = WIRE = = = = =
+void draw_rect(int x, int y, int w, int h, int thickness, uint32_t color) {
+    int a = w / 2, b = h / 2;
+    draw_line(x - a, y + b, x + a, y + b, thickness, color);
+    draw_line(x + a, y + b, x + a, y - b, thickness, color);
+    draw_line(x + a, y - b, x - a, y - b, thickness, color);
+    draw_line(x - a, y - b, x - a, y + b, thickness, color);
+}
 void draw_circle(int x, int y, int r, int thickness, int startAngle, int endAngle, uint32_t color) {
     int oldX, oldY;
     int first = 1;
@@ -64,7 +72,10 @@ void draw_circle(int x, int y, int r, int thickness, int startAngle, int endAngl
         oldY = py;
     }
 }
+// = = = = = FILL = = = = =
+void draw_rect_fill(int x, int y, int w, int h, uint32_t color) { for (int b = y - h / 2; b < y + h / 2; b++) { for (int a = x - w / 2; a < x + w / 2; a++) { draw_pixel(a, b, color); } } }
 
+// = = = = = TEXT = = = = =
 void draw_char(int x, int y, char c, uint32_t color, int scale) {
     const unsigned char* bitmap = font_basic[(unsigned char)c];
     for (int row = 0; row < 8; row++) { for (int col = 0; col < 8; col++) {
