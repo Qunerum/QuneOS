@@ -1,6 +1,32 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#define BLACK           0x000000
+// Normal
+#define GRAY            0x888888
+#define RED             0xEE0000
+#define GREEN           0x00EE00
+#define BLUE            0x0000EE
+#define MAGENTA         0xEE00EE
+#define ORANGE          0xEE8800
+// Light
+#define WHITE           0xFFFFFF
+#define CARMINE         0xEE4444
+#define LIME            0x44EE44
+#define CYAN            0x00EEEE
+#define PINK            0xEE44EE
+#define YELLOW          0xEEEE00
+// Dark
+#define DARK_GRAY       0x444444
+#define DARK_RED        0x880000
+#define DARK_GREEN      0x008800
+#define DARK_BLUE       0x000088
+#define PURPLE          0x880088
+#define BROWN           0x444400
+
+#define BACKGROUND_COLOR BLACK
+#define TEXT_COLOR GRAY
+
 struct vbe_mode_info {
     unsigned short attributes;
     unsigned char win_a, win_b;
