@@ -19,5 +19,8 @@ struct idt_ptr {
 
 // Keyboard
 void initKeyboard();
+extern int inputEnable;
+void setInput(int state);
+char* getInput();
 
 #endif

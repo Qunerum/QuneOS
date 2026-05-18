@@ -4,9 +4,15 @@
 #include "font.h"
 
 struct vbe_mode_info* vbe;
-int ScreenX = 0, ScreenY = 0;
-void initScreen(struct vbe_mode_info* v) { vbe = v; ScreenX = vbe->width / 2; ScreenY = vbe->height / 2; }
-void calcPos(int x, int y, int* xo, int* yo) { *xo = ScreenX + x; *yo = ScreenY - y; }
+int screenX = 0, screenY = 0, halfX = 0, halfY = 0;
+void initScreen(struct vbe_mode_info* v) { vbe = v; screenX = vbe->width; screenY = vbe->height; halfX = screenX / 2; halfY = screenY / 2; }
+void calcPos(int x, int y, int* xo, int* yo) { *xo = halfX + x; *yo = halfY - y; }
+void clear() {
+    draw_rect_fill(0, 0, vbe->width, vbe->height, 0x000000);
+    extern int cursorX, cursorY;
+    cursorX = 0;
+    cursorY = 0;
+}
 
 void draw_pixel(int x, int y, uint32_t color) {
     calcPos(x, y, &x, &y);
@@ -78,16 +84,16 @@ void draw_rect_fill(int x, int y, int w, int h, uint32_t color) { for (int b = y
 // = = = = = TEXT = = = = =
 void draw_char(int x, int y, char c, uint32_t color, int scale) {
     const unsigned char* bitmap = font_basic[(unsigned char)c];
-    for (int row = 0; row < 8; row++) { for (int col = 0; col < 8; col++) {
+    for (int row = 0; row < CHAR_SIZE; row++) { for (int col = 0; col < CHAR_SIZE; col++) {
             if (bitmap[row] & (0x80 >> col)) { for (int sy = 0; sy < scale; sy++) {
                     for (int sx = 0; sx < scale; sx++) { draw_pixel(x + (col * scale) + sx, y - (row * scale) - sy, color); } } } } }
 }
 void draw_text(int x, int y, char* str, int scale, uint32_t color) {
     int sx = x;
     while (*str) {
-        if (*str == '\n') { y -= (8 * scale); x = sx; str++; continue; }
+        if (*str == '\n') { y -= ((CHAR_SIZE + 1) * scale); x = sx; str++; continue; }
         draw_char(x, y, *str, color, scale);
-        x += (8 * scale);
+        x += (CHAR_SIZE * scale);
         str++;
     }
 }

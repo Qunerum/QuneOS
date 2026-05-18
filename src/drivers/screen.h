@@ -23,10 +23,13 @@ struct vbe_mode_info {
 } __attribute__((packed));
 typedef unsigned int uint32_t;
 
-extern int ScreenX;
-extern int ScreenY;
+extern int screenX;
+extern int screenY;
+extern int halfX;
+extern int halfY;
 
 void initScreen(struct vbe_mode_info* v);
+void clear();
 
 void draw_pixel(int x, int y, uint32_t color);
 void draw_line(int x1, int y1, int x2, int y2, int thickness, uint32_t color);

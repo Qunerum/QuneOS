@@ -1,5 +1,7 @@
+#include "../kernel/terminal.h"
+#include "../kernel/memory.h"
+#include "../lib/text.h"
 #include "keyboard.h"
-// #include "screen.h"
 
 // IDT
 struct idt_entry idt[256];
@@ -42,30 +44,21 @@ static const char scancode_ascii[] = {
     0,  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',   0,
     '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',   0, '*',   0, ' '
 };
-
-void initKeyboard() {  }
-
+char* input = NULL;
+void initKeyboard() { init_idt(); input = (char*)kmalloc(512); }
+int inputEnable = 0;
+void setInput(int state) { inputEnable = state; if (state) { input[0] = '\0'; } }
+char* getInput() { return input; }
+uint32_t color = 0xCCCCCC;
 void keyboard_handler_c(void) {
     uint8_t scancode = inb(0x60);
-    if (scancode < 0x80) {
+    if (inputEnable && scancode < 0x80) {
         char c = scancode_ascii[scancode];
         if (c != 0) {
-            if (c == '\n') {
-                // cursor_y -= 16;
-                // cursor_x = -500;
-                int x = 0;
-            }
-            else if (c == '\b') {
-                // if (cursor_x > -500) {
-                    // cursor_x -= 16;
-                    // draw_char(cursor_x, cursor_y, ' ', 0x000000, 2);
-                    int x = 0;
-                }
-        }
-        else {
-            char str[2] = {c, '\0'};
-            // draw_text(cursor_x, cursor_y, str, 1, 0xFFFFFF);
-            // cursor_x += 8;
+            if (c == '\n') { inputEnable = 0; printChar('\n', color); }
+            else if (c == '\t') { print("    ", color); addStr(input, "    ", 512); }
+            else if (c == '\b') { int l = len(input); if (l > 0) { input[l - 1] = '\0'; printChar('\b', color); } }
+            else { printChar(c, color); addChar(input, c, 512); }
         }
     }
     outb(0x20, 0x20);

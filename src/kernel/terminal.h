@@ -2,6 +2,8 @@
 #define TERMINAL_H
 
 typedef unsigned int uint32_t;
+void initTerminal();
+void printChar(char c, uint32_t color);
 void print(char* text, uint32_t color);
 
 #endif
