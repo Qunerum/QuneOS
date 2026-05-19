@@ -45,20 +45,33 @@ static const char scancode_ascii[] = {
     0,  'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',   0,
     '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/',   0, '*',   0, ' '
 };
+static const char scancode_ascii_shift[] = {
+    0,  27, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
+    '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',
+    0,  'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',   0,
+    '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',   0, '*',   0, ' '
+};
+
 char* input = NULL;
-void initKeyboard() { init_idt(); input = (char*)kmalloc(MAX_STRING_LEN); }
+int initKeyboard() { init_idt(); input = (char*)kmalloc(MAX_STRING_LEN); return 1; }
 int inputEnable = 0;
 void setInput(int state) { inputEnable = state; if (state) { input[0] = '\0'; } }
+int is_shift_pressed = 0, is_caps_lock_active = 0;
 char* getInput() { return input; }
 void keyboard_handler_c(void) {
     uint8_t scancode = inb(0x60);
-    if (inputEnable && scancode < 0x80) {
-        char c = scancode_ascii[scancode];
+    if (scancode == 0x2A || scancode == 0x36) { is_shift_pressed = 1; }
+    else if (scancode == 0xAA || scancode == 0xB6) { is_shift_pressed = 0; }
+    else if (scancode == 0x3A) { is_caps_lock_active = !is_caps_lock_active; }
+    else if (inputEnable && scancode < 0x80) {
+        char c = 0;
+        if (is_shift_pressed) { c = scancode_ascii_shift[scancode]; } else { c = scancode_ascii[scancode]; }
         if (c != 0) {
+            if (is_caps_lock_active && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) { if (c >= 'a' && c <= 'z') { c -= 32; } else if (c >= 'A' && c <= 'Z') { c += 32; } }
             if (c == '\n') { inputEnable = 0; printChar('\n', TEXT_COLOR); }
             else if (c == '\t') { print("    ", TEXT_COLOR); addStr(input, "    ", MAX_STRING_LEN); }
-            else if (c == '\b') { int l = len(input); if (l > 0) { input[l - 1] = '\0'; printChar('\b', WHITE); } }
-            else { printChar(c, WHITE); addChar(input, c, MAX_STRING_LEN); }
+            else if (c == '\b') { int l = len(input); if (l > 0) { input[l - 1] = '\0'; printChar('\b', BACKGROUND_COLOR); } }
+            else { printChar(c, INPUT_COLOR); addChar(input, c, MAX_STRING_LEN); }
         }
     }
     outb(0x20, 0x20);

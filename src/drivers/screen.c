@@ -5,7 +5,7 @@
 
 struct vbe_mode_info* vbe;
 int screenX = 0, screenY = 0, halfX = 0, halfY = 0;
-void initScreen(struct vbe_mode_info* v) { vbe = v; screenX = vbe->width; screenY = vbe->height; halfX = screenX / 2; halfY = screenY / 2; }
+int initScreen(struct vbe_mode_info* v) { if (!v) { return 0; } vbe = v; screenX = vbe->width; screenY = vbe->height; halfX = screenX / 2; halfY = screenY / 2; return 1; }
 void calcPos(int x, int y, int* xo, int* yo) { *xo = halfX + x; *yo = halfY - y; }
 void clear() {
     draw_rect_fill(0, 0, vbe->width, vbe->height, BACKGROUND_COLOR);
@@ -37,6 +37,17 @@ void draw_pixel(int x, int y, uint32_t color) {
         *pixel_ptr = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
     }
 }
+uint32_t get_pixel_raw(int x, int y) {
+    if (x < 0 || x >= vbe->width || y < 0 || y >= vbe->height) { return BACKGROUND_COLOR; }
+    unsigned long pixel_offset = (y * vbe->pitch);
+
+    if (vbe->bpp == 32) {
+        uint32_t* pixel_ptr = (uint32_t*)((unsigned long)vbe->physbase + pixel_offset + (x * 4));
+        return *pixel_ptr;
+    }
+    return BACKGROUND_COLOR;
+}
+
 void draw_line(int x1, int y1, int x2, int y2, int thickness, uint32_t color) {
     int dx = absolute(x2 - x1);
     int dy = -absolute(y2 - y1);

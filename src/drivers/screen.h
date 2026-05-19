@@ -26,6 +26,7 @@
 
 #define BACKGROUND_COLOR BLACK
 #define TEXT_COLOR GRAY
+#define INPUT_COLOR WHITE
 
 struct vbe_mode_info {
     unsigned short attributes;
@@ -54,10 +55,12 @@ extern int screenY;
 extern int halfX;
 extern int halfY;
 
-void initScreen(struct vbe_mode_info* v);
+int initScreen(struct vbe_mode_info* v);
 void clear();
 
 void draw_pixel(int x, int y, uint32_t color);
+uint32_t get_pixel_raw(int x, int y);
+
 void draw_line(int x1, int y1, int x2, int y2, int thickness, uint32_t color);
 
 // Wire
