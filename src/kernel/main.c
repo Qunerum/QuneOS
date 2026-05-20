@@ -1,6 +1,7 @@
 #include "../drivers/screen.h"
 #include "../drivers/keyboard.h"
 #include "../lib/text.h"
+// #include "kernel/memory.h"
 #include "terminal.h"
 #include "terminalCmds.h"
 
@@ -36,6 +37,9 @@ void checkColors() {
     printChar('\n', BLACK);
 }
 
+// #define TMP_COUNT 2
+// char* tmp[TMP_COUNT];
+
 __attribute__((section(".text.prologue")))
 void _start() {
     struct vbe_mode_info* vbe = (struct vbe_mode_info*)0x8000;
@@ -65,7 +69,6 @@ void _start() {
         while (inputEnable == 1) { __asm__ volatile("hlt"); }
         char* cmd = getInput();
 
-        if (len(cmd) == 0) { continue; }
-        else { runCmd(cmd, ""); }
+        if (len(cmd) == 0) { continue; } else { /* splitStart(cmd, ' ', tmp[0], tmp[1], MAX_STRING_LEN); */ runCmd(cmd, ""); }
     }
 }
