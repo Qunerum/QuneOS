@@ -24,7 +24,7 @@ MODE_INFO_ADDR equ 0x8000
     int 0x13
 
     mov ah, 0x02
-    mov al, 20
+    mov al, 50 ; Sectors
     mov bx, KERNEL_OFFSET
     mov cl, 0x02
     mov ch, 0x00

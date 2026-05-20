@@ -1,5 +1,5 @@
 #include "../kernel/terminal.h"
-#include "../kernel/memory.h"
+// #include "../kernel/memory.h"
 #include "../lib/text.h"
 #include "keyboard.h"
 #include "screen.h"
@@ -52,8 +52,11 @@ static const char scancode_ascii_shift[] = {
     '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',   0, '*',   0, ' '
 };
 
-char* input = NULL;
-int initKeyboard() { init_idt(); input = (char*)kmalloc(MAX_STRING_LEN); return 1; }
+char input[MAX_STRING_LEN];
+uint32_t initKeyboard() {
+    init_idt();
+    return (uint32_t)input;
+}
 int inputEnable = 0;
 void setInput(int state) { inputEnable = state; if (state) { input[0] = '\0'; } }
 int is_shift_pressed = 0, is_caps_lock_active = 0;

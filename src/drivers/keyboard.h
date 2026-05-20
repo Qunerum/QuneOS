@@ -18,7 +18,7 @@ struct idt_ptr {
 } __attribute__((packed));
 
 // Keyboard
-int initKeyboard();
+uint32_t initKeyboard();
 extern int inputEnable;
 void setInput(int state);
 char* getInput();

@@ -51,18 +51,13 @@ void intToStr(int v, char* out) {
 }
 void intToHex(uint32_t v, char* out) {
     int i = 0;
-    if (v == 0) {
-        out[i++] = '0';
-        out[i++] = 'x';
-        out[i++] = '0';
-        out[i] = '\0';
-        return;
-    }
+    if (v == 0) { copyStr(out, "0x00000000"); return; }
     while (v > 0) {
         int rem = v & 0xF;
         if (rem < 10) { out[i++] = rem + '0'; } else { out[i++] = (rem - 10) + 'A'; }
         v = v >> 4;
     }
+    while (i < 8) { out[i++] = '0'; }
     out[i++] = 'x';
     out[i++] = '0';
     out[i] = '\0';

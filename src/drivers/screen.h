@@ -55,7 +55,7 @@ extern int screenY;
 extern int halfX;
 extern int halfY;
 
-int initScreen(struct vbe_mode_info* v);
+uint32_t initScreen(struct vbe_mode_info* v);
 void clear();
 
 void draw_pixel(int x, int y, uint32_t color);

@@ -5,7 +5,16 @@
 
 struct vbe_mode_info* vbe;
 int screenX = 0, screenY = 0, halfX = 0, halfY = 0;
-int initScreen(struct vbe_mode_info* v) { if (!v) { return 0; } vbe = v; screenX = vbe->width; screenY = vbe->height; halfX = screenX / 2; halfY = screenY / 2; return 1; }
+uint32_t initScreen(struct vbe_mode_info* v) {
+    if (!v || v->physbase == 0) { return 0; }
+    vbe = v;
+    screenX = vbe->width;
+    screenY = vbe->height;
+    halfX = screenX / 2;
+    halfY = screenY / 2;
+    return (uint32_t)vbe->physbase;
+}
+
 void calcPos(int x, int y, int* xo, int* yo) { *xo = halfX + x; *yo = halfY - y; }
 void clear() {
     draw_rect_fill(0, 0, vbe->width, vbe->height, BACKGROUND_COLOR);

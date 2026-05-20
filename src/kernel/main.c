@@ -2,15 +2,27 @@
 #include "../drivers/keyboard.h"
 #include "../lib/text.h"
 // #include "kernel/memory.h"
+#include "kernel/memory.h"
 #include "terminal.h"
 #include "terminalCmds.h"
 
-void printState(char* text, int state) {
-    print(text, TEXT_COLOR);
-    for (int i = 0; i < 20 - len(text); i++) { printChar(' ', BACKGROUND_COLOR); }
-    print("[", DARK_GRAY);
-    print(state ? " OK " : "ERR!", state ? GREEN : RED);
-    print("]\n", DARK_GRAY);
+void printState(char* text, uint32_t result) {
+    print(text, result == 0 ? CARMINE : TEXT_COLOR);
+    for (int i = 0; i < 15 - len(text); i++) { printChar('.', DARK_GRAY); }
+    if (result == 0) {
+        print("[ ", DARK_GRAY);
+        print("ERR!", RED);
+        print(" ]\n", DARK_GRAY);
+    } else {
+        char hexBuf[12];
+        intToHex(result, hexBuf);
+        print("[  ", DARK_GRAY);
+        print("OK", GREEN);
+        print("  ] ", DARK_GRAY);
+        print("at ", DARK_GRAY);
+        print(hexBuf, GRAY);
+        printChar('\n', TEXT_COLOR);
+    }
 }
 void checkColors() {
     printChar('\n', BLACK); // Normal
@@ -37,8 +49,8 @@ void checkColors() {
     printChar('\n', BLACK);
 }
 
-// #define TMP_COUNT 2
-// char* tmp[TMP_COUNT];
+#define TMP_COUNT 2
+char* tmp[TMP_COUNT];
 
 __attribute__((section(".text.prologue")))
 void _start() {
@@ -50,6 +62,7 @@ void _start() {
         vbe->width = 1024;
         vbe->height = 768;
     }
+    for (int i = 0; i < TMP_COUNT; i++) { tmp[i] = kmalloc(MAX_STRING_LEN); }
     printState("Screen", initScreen(vbe));
     printState("Terminal", initTerminal());
     printState("Keyboard", initKeyboard());
@@ -63,12 +76,12 @@ void _start() {
 
     while(1) {
         print("QuneOS \x84 ", TEXT_COLOR);
-
         setInput(1);
-
         while (inputEnable == 1) { __asm__ volatile("hlt"); }
         char* cmd = getInput();
-
-        if (len(cmd) == 0) { continue; } else { /* splitStart(cmd, ' ', tmp[0], tmp[1], MAX_STRING_LEN); */ runCmd(cmd, ""); }
+        if (len(cmd) == 0) { continue; } else {
+            if (contains(cmd, ' ')) { splitStart(cmd, ' ', tmp[0], tmp[1], MAX_STRING_LEN); runCmd(tmp[0], tmp[1]); }
+            else { runCmd(cmd, ""); }
+        }
     }
 }

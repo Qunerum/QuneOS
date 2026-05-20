@@ -8,6 +8,7 @@ typedef unsigned int uint32_t;
 
 static inline int len(char* text) { char* start = text; while (*text) { text++; } return (int)(text - start); }
 static inline int is(char* a, char* b) { while (*a != '\0' && *b != '\0') { if (*a != *b) return 0; a++; b++; } return (*a == *b); }
+static inline int contains(char* text, char a) { while (*text) { if (*text == a) return 1; text++; } return 0; }
 
 void addStr(char* a, char* b, int maxLen);
 void addChar(char* a, char b, int maxLen);
