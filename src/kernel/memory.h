@@ -1,8 +1,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#include <stdint.h>
-#include <stddef.h>
+#include "types.h" // IWYU pragma: keep
 
 typedef struct MemoryBlock {
     size_t size;
