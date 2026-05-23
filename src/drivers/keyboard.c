@@ -1,4 +1,5 @@
 #include "../kernel/terminal.h"
+#include "../kernel/types.h" // IWYU pragma: keep
 // #include "../kernel/memory.h"
 #include "../lib/text.h"
 #include "keyboard.h"

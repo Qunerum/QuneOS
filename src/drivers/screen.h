@@ -1,6 +1,8 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include "../kernel/types.h" // IWYU pragma: keep
+
 #define BLACK           0x000000
 // Normal
 #define GRAY            0x888888
@@ -48,7 +50,6 @@ struct vbe_mode_info {
     unsigned char direct_color_attributes;
     unsigned int physbase;
 } __attribute__((packed));
-typedef unsigned int uint32_t;
 
 extern int screenX;
 extern int screenY;

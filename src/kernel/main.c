@@ -2,7 +2,6 @@
 #include "../drivers/keyboard.h"
 #include "../lib/text.h"
 // #include "kernel/memory.h"
-#include "kernel/memory.h"
 #include "terminal.h"
 #include "terminalCmds.h"
 
@@ -49,9 +48,6 @@ void checkColors() {
     printChar('\n', BLACK);
 }
 
-#define TMP_COUNT 2
-char* tmp[TMP_COUNT];
-
 __attribute__((section(".text.prologue")))
 void _start() {
     struct vbe_mode_info* vbe = (struct vbe_mode_info*)0x8000;
@@ -62,7 +58,6 @@ void _start() {
         vbe->width = 1024;
         vbe->height = 768;
     }
-    for (int i = 0; i < TMP_COUNT; i++) { tmp[i] = kmalloc(MAX_STRING_LEN); }
     printState("Screen", initScreen(vbe));
     printState("Terminal", initTerminal());
     printState("Keyboard", initKeyboard());
@@ -71,8 +66,10 @@ void _start() {
 
     print("\nWelcome to QuneOS!\n", GREEN);
 
-    // draw_text(-400, 0, "\x80 , \x81 , \x82 , \x83 , \x84 , \x85 , \x86 , \x87 , \x88 , \x89 \n", 2, TEXT_COLOR);
-    // draw_char(0, 100, '\x8A', WHITE, 4);
+    draw_text(-400, 0, "\x80 , \x81 , \x82 , \x83 , \x84 , \x85 , \x86 , \x87 , \x88 , \x89 \n", 2, TEXT_COLOR);
+
+    char tokenCmd[MAX_STRING_LEN];
+    char tokenArg[MAX_STRING_LEN];
 
     while(1) {
         print("QuneOS \x84 ", TEXT_COLOR);
@@ -80,7 +77,7 @@ void _start() {
         while (inputEnable == 1) { __asm__ volatile("hlt"); }
         char* cmd = getInput();
         if (len(cmd) == 0) { continue; } else {
-            if (contains(cmd, ' ')) { splitStart(cmd, ' ', tmp[0], tmp[1], MAX_STRING_LEN); runCmd(tmp[0], tmp[1]); }
+            if (contains(cmd, ' ')) { splitStart(cmd, ' ', tokenCmd, tokenArg, MAX_STRING_LEN); runCmd(tokenCmd, tokenArg); }
             else { runCmd(cmd, ""); }
         }
     }

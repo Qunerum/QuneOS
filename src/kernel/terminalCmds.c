@@ -7,11 +7,13 @@
 
 void help_qos(char* args) { for (int i = 0; i < cmd_count; i++) { print("- ", TEXT_COLOR); print(cmds[i].cmd, !(i % 2) ? ORANGE : YELLOW); printChar('\n', TEXT_COLOR); } }
 void version_qos(char* args) { print("The current version of QuneOS is: ", DARK_GREEN); print(OS_VERSION "\n", GREEN); }
-void echo_qos(char* args) { print(args, TEXT_COLOR); }
+void clear_qos(char* args) { clear(); }
+void echo_qos(char* args) { print(args, TEXT_COLOR); printChar('\n', TEXT_COLOR); }
 
 qosCMD cmds[] = {
     {"help", help_qos},
     {"version", version_qos},
+    {"clear", clear_qos},
     {"echo", echo_qos},
 };
 int cmd_count = sizeof(cmds) / sizeof(qosCMD);

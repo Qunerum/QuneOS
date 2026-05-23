@@ -1,5 +1,4 @@
 #include "../lib/math.h"
-// #include "../lib/text.h"
 #include "screen.h"
 #include "font.h"
 
@@ -19,8 +18,7 @@ void calcPos(int x, int y, int* xo, int* yo) { *xo = halfX + x; *yo = halfY - y;
 void clear() {
     draw_rect_fill(0, 0, vbe->width, vbe->height, BACKGROUND_COLOR);
     extern int cursorX, cursorY;
-    cursorX = 0;
-    cursorY = 0;
+    cursorX = 0; cursorY = 0;
 }
 
 void draw_pixel(int x, int y, uint32_t color) {
