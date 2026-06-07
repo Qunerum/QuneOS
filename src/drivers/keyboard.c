@@ -1,15 +1,16 @@
-#include "../kernel/terminal.h"
+// #include "../kernel/terminal.h"
 #include "../kernel/types.h" // IWYU pragma: keep
 // #include "../kernel/memory.h"
 #include "../lib/text.h"
 #include "keyboard.h"
-#include "screen.h"
+// #include "screen.h"
 
 // IDT
 struct idt_entry idt[256];
 struct idt_ptr idtp;
 extern void idt_load(uint32_t pointer);
 extern void keyboard_handler_asm(void);
+extern void mouse_handler_asm(void);
 void set_idt_gate(int num, uint32_t base, uint16_t sel, uint8_t flags) {
     idt[num].base_low = (base & 0xFFFF);
     idt[num].base_high = (base >> 16) & 0xFFFF;
@@ -26,17 +27,20 @@ void init_pic(void) {
     outb(0xA1, 0x02);
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
-    outb(0x21, 0xFD);
-    outb(0xA1, 0xFF);
+
+    // Master PIC: 0xF9 to binarnie 11111001 (włączone IRQ1 i IRQ2)
+    outb(0x21, 0xF9);
+    // Slave PIC: 0xEF to binarnie 11101111 (włączone tylko IRQ12)
+    outb(0xA1, 0xEF);
 }
-void init_idt(void) {
-    idtp.limit = (sizeof(struct idt_entry) * 256) - 1;
-    idtp.base = (uint32_t)&idt;
-    for(int i = 0; i < 256; i++) { set_idt_gate(i, 0, 0, 0); }
+uint32_t init_idt(void) {
     init_pic();
     set_idt_gate(0x21, (uint32_t)keyboard_handler_asm, 0x08, 0x8E);
+    set_idt_gate(0x2C, (uint32_t)mouse_handler_asm, 0x08, 0x8E);
+    idtp.limit = (sizeof(struct idt_entry) * 256) - 1;
+    idtp.base = (uint32_t)&idt;
     idt_load((uint32_t)&idtp);
-    __asm__ volatile("sti");
+    return (uint32_t)&idtp;
 }
 
 // Keyboard
@@ -54,16 +58,16 @@ static const char scancode_ascii_shift[] = {
 };
 
 char input[MAX_STRING_LEN];
-uint32_t initKeyboard() {
-    init_idt();
-    return (uint32_t)input;
-}
+uint32_t initKeyboard() { return (uint32_t)input; }
 int inputEnable = 0;
 void setInput(int state) { inputEnable = state; if (state) { input[0] = '\0'; } }
 int is_shift_pressed = 0, is_caps_lock_active = 0;
 char* getInput() { return input; }
+volatile int keyboardUpdated = 0;
+volatile char lastChar = 0;
 void keyboard_handler_c(void) {
     uint8_t scancode = inb(0x60);
+
     if (scancode == 0x2A || scancode == 0x36) { is_shift_pressed = 1; }
     else if (scancode == 0xAA || scancode == 0xB6) { is_shift_pressed = 0; }
     else if (scancode == 0x3A) { is_caps_lock_active = !is_caps_lock_active; }
@@ -71,12 +75,11 @@ void keyboard_handler_c(void) {
         char c = 0;
         if (is_shift_pressed) { c = scancode_ascii_shift[scancode]; } else { c = scancode_ascii[scancode]; }
         if (c != 0) {
-            if (is_caps_lock_active && ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))) { if (c >= 'a' && c <= 'z') { c -= 32; } else if (c >= 'A' && c <= 'Z') { c += 32; } }
-            if (c == '\n') { inputEnable = 0; printChar('\n', TEXT_COLOR); }
-            else if (c == '\t') { print("    ", TEXT_COLOR); addStr(input, "    ", MAX_STRING_LEN); }
-            else if (c == '\b') { int l = len(input); if (l > 0) { input[l - 1] = '\0'; printChar('\b', BACKGROUND_COLOR); } }
-            else { printChar(c, INPUT_COLOR); addChar(input, c, MAX_STRING_LEN); }
+            lastChar = c;
+            keyboardUpdated = 1;
         }
     }
+
+    // BEZWZGLĘDNE WYMAGANIE: Informujemy Master PIC na samym końcu funkcji!
     outb(0x20, 0x20);
 }

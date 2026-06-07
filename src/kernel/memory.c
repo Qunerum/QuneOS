@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE  0x1000000 // 16MB
+#define HEAP_SIZE  0x40000 // 16MB
 
 #define ALIGN(size) (((size) + 7) & ~7)
 

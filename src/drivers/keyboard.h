@@ -17,6 +17,7 @@ struct idt_ptr {
     uint16_t limit;
     uint32_t base;
 } __attribute__((packed));
+uint32_t init_idt(void);
 
 // Keyboard
 uint32_t initKeyboard();

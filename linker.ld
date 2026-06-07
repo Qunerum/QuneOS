@@ -3,8 +3,9 @@ SECTIONS
 {
     . = 0x1000;
     .text : {
-        *(.text.prologue)
+        *kernel_entry.o(.text)
         *(.text)
+        *(.rodata*)
     }
     .data : { *(.data) }
     .bss  : { *(.bss)  }

@@ -2,12 +2,13 @@
 KERNEL_OFFSET equ 0x1000
 MODE_INFO_ADDR equ 0x8000
 
+    mov [BOOT_DRIVE], dl
+
     xor ax, ax
     mov ds, ax
     mov es, ax
     mov ss, ax
     mov sp, 0x7c00
-    mov [BOOT_DRIVE], dl
 
     mov edi, MODE_INFO_ADDR
     xor al, al
@@ -24,7 +25,7 @@ MODE_INFO_ADDR equ 0x8000
     int 0x13
 
     mov ah, 0x02
-    mov al, 50 ; Sectors
+    mov al, 50             ; Wczytujemy 50 sektorów
     mov bx, KERNEL_OFFSET
     mov cl, 0x02
     mov ch, 0x00
@@ -48,12 +49,16 @@ MODE_INFO_ADDR equ 0x8000
     jmp 0x08:init_pm
 
 disk_error:
+    mov ax, 0x0003
+    int 0x10
     mov ah, 0x0e
     mov al, 'D'
     int 0x10
     jmp $
 
 vesa_error:
+    mov ax, 0x0003
+    int 0x10
     mov ah, 0x0e
     mov al, 'V'
     int 0x10
@@ -61,18 +66,8 @@ vesa_error:
 
 [bits 32]
 init_pm:
-    mov ax, 0x10
-    mov ds, ax
-    mov ss, ax
-    mov es, ax
-    mov fs, ax
-    mov gs, ax
-    mov ebp, 0x90000
-    mov esp, ebp
-
-    mov ebx, MODE_INFO_ADDR
-    call KERNEL_OFFSET
-    jmp $
+    ; Skaczemy bezpośrednio pod 0x1000, gdzie linker położył nasz bezpieczny kernel_entry.asm
+    jmp KERNEL_OFFSET
 
 align 16
 gdt_start:

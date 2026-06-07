@@ -20,7 +20,6 @@ void clear() {
     extern int cursorX, cursorY;
     cursorX = 0; cursorY = 0;
 }
-
 void draw_pixel(int x, int y, uint32_t color) {
     calcPos(x, y, &x, &y);
     if (x < 0 || x >= vbe->width || y < 0 || y >= vbe->height) { return; }
@@ -44,7 +43,8 @@ void draw_pixel(int x, int y, uint32_t color) {
         *pixel_ptr = ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
     }
 }
-uint32_t get_pixel_raw(int x, int y) {
+uint32_t get_pixel(int x, int y) {
+    calcPos(x, y, &x, &y);
     if (x < 0 || x >= vbe->width || y < 0 || y >= vbe->height) { return BACKGROUND_COLOR; }
     unsigned long pixel_offset = (y * vbe->pitch);
 
@@ -98,7 +98,6 @@ void draw_circle(int x, int y, int r, int thickness, int startAngle, int endAngl
 }
 // = = = = = FILL = = = = =
 void draw_rect_fill(int x, int y, int w, int h, uint32_t color) { for (int b = y - h / 2; b < y + h / 2; b++) { for (int a = x - w / 2; a < x + w / 2; a++) { draw_pixel(a, b, color); } } }
-
 // = = = = = TEXT = = = = =
 void draw_char(int x, int y, char c, uint32_t color, int scale) {
     const unsigned char* bitmap = font_basic[(unsigned char)c];
