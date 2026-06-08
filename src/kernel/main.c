@@ -87,19 +87,15 @@ void _start_c() {
         inputEnable = 1;
 
         while(inputEnable) {
-            // 1. Bezpieczna obsługa myszy poza przerwaniem
             if (mouseUpdated) {
-                // Wyłączamy przerwania tylko na krytyczny moment odczytu i zapisu flagi
                 __asm__ volatile("cli");
                 mouseUpdated = 0;
                 __asm__ volatile("sti");
 
-                // Odświeżamy kursor na ekranie
                 mouse_restore_background();
                 mouse_draw();
             }
 
-            // 2. Obsługa klawiatury (zostaje bez zmian)
             if (keyboardUpdated) {
                 char c = lastChar;
                 keyboardUpdated = 0;
@@ -126,7 +122,6 @@ void _start_c() {
             }
         }
 
-        // Wykonanie komendy po wyjściu z pętli (gdy inputEnable == 0)
         char* cmd = getInput();
         if (len(cmd) == 0) { continue; }
         else {

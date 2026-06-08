@@ -28,9 +28,7 @@ void init_pic(void) {
     outb(0x21, 0x01);
     outb(0xA1, 0x01);
 
-    // Master PIC: 0xF9 to binarnie 11111001 (włączone IRQ1 i IRQ2)
     outb(0x21, 0xF9);
-    // Slave PIC: 0xEF to binarnie 11101111 (włączone tylko IRQ12)
     outb(0xA1, 0xEF);
 }
 uint32_t init_idt(void) {
@@ -79,7 +77,5 @@ void keyboard_handler_c(void) {
             keyboardUpdated = 1;
         }
     }
-
-    // BEZWZGLĘDNE WYMAGANIE: Informujemy Master PIC na samym końcu funkcji!
     outb(0x20, 0x20);
 }

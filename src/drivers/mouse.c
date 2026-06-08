@@ -23,19 +23,13 @@ const uint8_t mouse_pointer[8][8] = {
 };
 void mouse_handler_c() {
     uint8_t status = inb(0x64);
-
-    // Jeśli w buforze wyjściowym są dane (bit 0 jest ustawiony)
     if (status & 0x01) {
-        uint8_t data = inb(0x60); // Bezwzględnie pobieramy bajt
+        uint8_t data = inb(0x60);
 
-        // Usunęliśmy if(status & 0x20) - w IRQ12 te dane to ZAWSZE mysz!
         switch(mouseCycle) {
             case 0:
                 mousePacket[0] = data;
-                // Synchronizacja: bit 3 pierwszego bajtu MUSI być równy 1
                 if (!(data & 0x08)) {
-                    // Jeśli nie jest, to znaczy, że zgubiliśmy bajt.
-                    // Nie inkrementujemy cyklu, czekamy na właściwy początek pakietu.
                     break;
                 }
                 mouseCycle++;
@@ -46,32 +40,27 @@ void mouse_handler_c() {
                 break;
             case 2:
                 mousePacket[2] = data;
-                mouseCycle = 0; // Reset pętli pakietu
+                mouseCycle = 0;
 
-                // Dekodowanie przesunięcia
                 int rel_x = mousePacket[1];
                 int rel_y = mousePacket[2];
 
-                // Obsługa bitów znaku dla wartości ujemnych
                 if (mousePacket[0] & 0x10) rel_x |= 0xFFFFFF00;
                 if (mousePacket[0] & 0x20) rel_y |= 0xFFFFFF00;
 
-                // Aktualizacja pozycji (w przerwaniu tylko zmieniamy liczby!)
                 mouseX += rel_x;
             mouseY += rel_y;
 
-            // Sprawdzanie granic ekranu wewnątrz przerwania, żeby wartości nie oszalały
             if (mouseX < -halfX) mouseX = -halfX;
             if (mouseX > halfX - MOUSE_SIZE_W) mouseX = halfX - MOUSE_SIZE_W;
             if (mouseY > halfY) mouseY = halfY;
             if (mouseY < -halfY + MOUSE_SIZE_H) mouseY = -halfY + MOUSE_SIZE_H;
 
-            mouseUpdated = 1; // Flaga dla main.c
+            mouseUpdated = 1;
             break;
         }
     }
 
-    // Informujemy oba układy PIC o zakończeniu obsługi przerwania
     outb(0xA0, 0x20); // Slave PIC
     outb(0x20, 0x20); // Master PIC
 }
@@ -91,50 +80,42 @@ void mouse_draw() {
     oldMouseY = mouseY;
 }
 void mouse_wait(uint8_t type) { uint32_t timeout = 100000; if (type == 0) { while (timeout--) { if ((inb(0x64) & 2) == 0) return; } } else { while (timeout--) { if ((inb(0x64) & 1) == 1) return; } } }
-// Nowa pomocnicza funkcja do bezpiecznego odczytu z portu myszy
 uint8_t mouse_read(void) {
-    mouse_wait(1); // Czekaj, aż dane będą gotowe do odczytu (bit 0 na porcie 0x64 będzie 1)
+    mouse_wait(1);
     return inb(0x60);
 }
 
 void mouse_write(uint8_t write) {
-    mouse_wait(0); // Czekaj, aż bufor zapisu będzie wolny
-    outb(0x64, 0xD4); // Informujemy kontroler, że ślemy komendę DO MYSZY
     mouse_wait(0);
-    outb(0x60, write); // Ślemy właściwą komendę
+    outb(0x64, 0xD4);
+    mouse_wait(0);
+    outb(0x60, write);
 }
 
 uint32_t initMouse(void) {
     uint8_t status;
 
-    // 1. Włącz port myszy (Auxiliary Device) w kontrolerze PS/2
     mouse_wait(0);
     outb(0x64, 0xA8);
 
-    // 2. Poproś o aktualny "Command Byte" z kontrolera
     mouse_wait(0);
     outb(0x64, 0x20);
     status = mouse_read();
 
-    // 3. Zmodyfikuj Command Byte: włącz przerwania IRQ12 (bit 1) i odblokuj mysz (wyczyść bit 5)
-    status |= 0x02;   // Bit 1: Włącz przerwanie IRQ12
-    status &= ~0x20;  // Bit 5: Wyłącz blokowanie myszy
+    status |= 0x02;
+    status &= ~0x20;
 
-    // 4. Zapisz zmodyfikowany Command Byte z powrotem do kontrolera
     mouse_wait(0);
     outb(0x64, 0x60);
     mouse_wait(0);
     outb(0x60, status);
 
-    // 5. Przywróć domyślne ustawienia myszy (Set Defaults)
     mouse_write(0xF6);
-    mouse_read(); // Odbieramy i ignorujemy obowiązkowe ACK (0xFA) od myszy
+    mouse_read();
 
-    // 6. KLUCZOWE: Włącz przesyłanie strumienia danych (Enable Data Reporting)
     mouse_write(0xF4);
-    mouse_read(); // Odbieramy i ignorujemy obowiązkowe ACK (0xFA) od myszy
+    mouse_read();
 
-    // Ustawienie początkowych współrzędnych myszy na środku ekranu
     mouseX = 0;
     mouseY = 0;
 
